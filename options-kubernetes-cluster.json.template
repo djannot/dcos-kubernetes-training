@@ -1,0 +1,15 @@
+{
+  "service": {
+    "name": "training/prod/k8s/clusterTOBEREPLACED",
+    "service_account": "training-prod-k8s-clusterTOBEREPLACED",
+    "service_account_secret": "/training/prod/k8s/clusterTOBEREPLACED/private-training-prod-k8s-clusterTOBEREPLACED"
+  },
+  "kubernetes": {
+    "authorization_mode": "RBAC",
+    "high_availability": false,
+    "private_node_count": 2,
+    "private_reserved_resources": {
+      "kube_mem": 4096
+    }
+  }
+}

@@ -1,0 +1,86 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app: dklb
+  name: dklb
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: dklb
+  name: dklb
+rules:
+# Allow for performing leader election.
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - create
+  - get
+  - update
+# Allow for emitting Kubernetes events.
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+# Allow for listing/watching Ingress resources.
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs:
+  - list
+  - watch
+# Allow for listing/watching Service resources.
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - list
+  - watch
+# Allow for updating the status of Ingress resources.
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses/status
+  verbs:
+  - update
+# Allow for updating the status of Service resources.
+- apiGroups:
+  - ""
+  resources:
+  - services/status
+  verbs:
+  - update
+# Allow for reading, creating and updating MutatingWebhookConfiguration resources.
+- apiGroups:
+  - "admissionregistration.k8s.io"
+  resources:
+  - mutatingwebhookconfigurations
+  verbs:
+  - create
+  - get
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app: dklb
+  name: dklb
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: dklb
+subjects:
+  - kind: ServiceAccount
+    name: dklb
+    namespace: kube-system
