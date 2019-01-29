@@ -131,7 +131,8 @@ It will allow you to create the DC/OS service account with the right permissions
 Deploy your Kubernetes cluster using the following command:
 
 ```
-chmod deploy-kubernetes-cluster.sh
+dcos package install kubernetes --cli
+chmod +x deploy-kubernetes-cluster.sh
 ./deploy-kubernetes-cluster.sh ${CLUSTER}
 ```
 
@@ -343,18 +344,17 @@ The dklb EdgeLB pool is automatically updated on DC/OS:
 You can validate that you can access the web application PODs from your laptop using the following commands:
 
 ```
-curl -H "Host: http-echo-${CLUSTER}-1.com" http://${PUBLIC}:90${CLUSTER}
-curl -H "Host: http-echo-${CLUSTER}-2.com" http://${PUBLIC}:90${CLUSTER}
+curl -H "Host: http-echo-${CLUSTER}-1.com" http://${PUBLICIP}:90${CLUSTER}
+curl -H "Host: http-echo-${CLUSTER}-2.com" http://${PUBLICIP}:90${CLUSTER}
 ```
 
 ## 6. Leverage persistent storage using Portworx
 
 Portworx is a Software Defined Software that can use the local storage of the DC/OS nodes to provide High Available persistent storage to both Kubernetes pods and DC/OS services.
 
-To be able to use Portworx persistent storage on your Kubernetes cluster, you need to deploy it in your Kubernetes cluster using the following commands:
+To be able to use Portworx persistent storage on your Kubernetes cluster, you need to deploy it in your Kubernetes cluster using the following command:
 
 ```
-version=$(kubectl version --short | awk -Fv '/Server Version: / {print $3}')
 kubectl apply -f "https://install.portworx.com/2.0?kbver=1.12.3&b=true&dcos=true&stork=true"
 ```
 
@@ -663,7 +663,7 @@ Run the following commands to go to the Istio directory and to install Istio usi
 cd istio-1.0.5
 export PATH=$PWD/bin:$PATH
 helm install install/kubernetes/helm/istio --name istio --namespace istio-system \
-  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=istio-ingressgateway \
+  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb \
   --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-size"=\"2\" \
   --set gateways.istio-ingressgateway.ports[0].port=100${CLUSTER} \
   --set gateways.istio-ingressgateway.ports[0].targetPort=80 \
@@ -683,7 +683,7 @@ kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
 ```
 
 Go to the following URL to access the application:
-[http://${PUBLICIP}/productpage](http://${PUBLICIP}/productpage)
+[http://${PUBLICIP}:100${CLUSTER}/productpage](http://${PUBLICIP}:100${CLUSTER}/productpage)
 
 You can then follow the other steps described in the Istio documentation to understand the different Istio features:
 

@@ -1,6 +1,6 @@
 export APPNAME=training
-export PUBLICIP=18.210.143.100
-clusters=20
+export PUBLICIP=35.169.234.191
+clusters=30
 
 ./create-and-attach-volumes.sh
 ./update-aws-network-configuration.sh ${clusters}
