@@ -1,12 +1,13 @@
 export APPNAME=training
 export PUBLICIP=35.175.49.235
-clusters=2
+clusters=50
+loadbalancer=ext-denis
 # The group ID of the AWS Security Group of the DC/OS public nodes
 group=sg-0949a79745e345b69
 
 ./create-and-attach-volumes.sh
 # If clusters < 10, then use 01, 02, ...
-./update-aws-network-configuration.sh ${clusters} ${group}
+./update-aws-network-configuration.sh ${clusters} ${loadbalancer} ${group}
 
 dcos package repo add --index=0 kubernetes-aws "https://universe-converter.mesosphere.com/transform?url=https://dcos-kubernetes-artifacts.s3.amazonaws.com/nightlies/kubernetes/master/stub-universe-kubernetes.json"
 dcos package repo add --index=0 kubernetes-cluster-aws "https://universe-converter.mesosphere.com/transform?url=https://dcos-kubernetes-artifacts.s3.amazonaws.com/nightlies/kubernetes-cluster/master/stub-universe-kubernetes-cluster.json"
@@ -32,6 +33,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   ./check-kubernetes-cluster-status.sh ${APPNAME}/prod/k8s/cluster${i}
 done
 
+./create-pool-edgelb-all.sh
 ./deploy-edgelb.sh
 ./check-app-status.sh infra/network/dcos-edgelb/pools/all
 
@@ -276,6 +278,7 @@ done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   kubectl config use-context training-prod-k8s-cluster${i}
+  sleep 1
   kubectl apply -f csi-driver-deployments-master/aws-ebs/kubernetes/latest/
 done
 
