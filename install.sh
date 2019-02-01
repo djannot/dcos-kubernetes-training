@@ -1,14 +1,15 @@
 export APPNAME=training
-export PUBLICIP=35.169.234.191
-clusters=30
+export PUBLICIP=35.175.49.235
+clusters=2
+# The group ID of the AWS Security Group of the DC/OS public nodes
+group=sg-0949a79745e345b69
 
 ./create-and-attach-volumes.sh
-./update-aws-network-configuration.sh ${clusters}
+# If clusters < 10, then use 01, 02, ...
+./update-aws-network-configuration.sh ${clusters} ${group}
 
 dcos package repo add --index=0 kubernetes-aws "https://universe-converter.mesosphere.com/transform?url=https://dcos-kubernetes-artifacts.s3.amazonaws.com/nightlies/kubernetes/master/stub-universe-kubernetes.json"
 dcos package repo add --index=0 kubernetes-cluster-aws "https://universe-converter.mesosphere.com/transform?url=https://dcos-kubernetes-artifacts.s3.amazonaws.com/nightlies/kubernetes-cluster/master/stub-universe-kubernetes-cluster.json"
-dcos package repo add --index=0 edgelb-aws https://universe-converter.mesosphere.com/transform?url=https://edge-lb-infinity-artifacts.s3.amazonaws.com/autodelete7d/v1.2.3-42-g6643742/edgelb/stub-universe-edgelb.json
-dcos package repo add --index=0 edgelb-pool-aws https://universe-converter.mesosphere.com/transform?url=https://edge-lb-infinity-artifacts.s3.amazonaws.com/autodelete7d/v1.2.3-42-g6643742/edgelb-pool/stub-universe-edgelb-pool.json
 
 dcos package install --yes --cli dcos-enterprise-cli
 

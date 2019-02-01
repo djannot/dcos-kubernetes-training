@@ -14,7 +14,7 @@
     "portworx_options": "-a -x mesos",
     "kvdb_servers": "",
     "container_parameters": "",
-    "count": 15,
+    "count": 10,
     "placement_constraint": "hostname:UNIQUE"
   },
   "secrets": {
