@@ -37,7 +37,7 @@ spec:
       priorityClassName: system-node-critical
       containers:
       - name: dklb
-        image: mesosphere/dklb:v0.1.0-alpha.4-6-ga9bd90c
+        image: mesosphere/dklb:v0.1.0-alpha.6-5-g6e182f4
         imagePullPolicy: Always
         args:
         - /dklb
@@ -58,7 +58,8 @@ spec:
         - "$(CLUSTER_NAME)"
         - --log-level
         - debug
-        - --edgelb-pool-namespace
+        # NOTE: Must be changed whenever EdgeLB is installed under a DC/OS service group other than "dcos-edgelb".
+        - --edgelb-pool-group
         - infra/network/dcos-edgelb/pools
         ports:
         - name: default-backend

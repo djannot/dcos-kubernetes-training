@@ -1,9 +1,9 @@
 export APPNAME=training
-export PUBLICIP=35.175.49.235
-clusters=50
-loadbalancer=ext-denis
+export PUBLICIP=18.205.220.40
+clusters=5
+loadbalancer=ext-djannot
 # The group ID of the AWS Security Group of the DC/OS public nodes
-group=sg-0949a79745e345b69
+group=sg-04e433402d6583dbf
 
 ./create-and-attach-volumes.sh
 # If clusters < 10, then use 01, 02, ...
@@ -33,7 +33,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   ./check-kubernetes-cluster-status.sh ${APPNAME}/prod/k8s/cluster${i}
 done
 
-./create-pool-edgelb-all.sh
+./create-pool-edgelb-all.sh ${clusters}
 ./deploy-edgelb.sh
 ./check-app-status.sh infra/network/dcos-edgelb/pools/all
 
@@ -43,12 +43,18 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
 done
 sudo mv hosts /etc/hosts
 
-rm ~/.kube/config
+if [ -f ~/.kube/config ]; then
+  mv ~/.kube/config ~/.kube/config.ori
+fi
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   dcos kubernetes cluster kubeconfig --context-name=${APPNAME}-prod-k8s-cluster${i} --cluster-name=${APPNAME}/prod/k8s/cluster${i} \
     --apiserver-url https://${APPNAME}.prod.k8s.cluster${i}.mesos.lab:8443 \
     --insecure-skip-tls-verify
+  mv ~/.kube/config ./config.cluster${i}
 done
+if [ -f ~/.kube/config.ori ]; then
+  mv ~/.kube/config.ori ~/.kube/config
+fi
 
 # 2. Scale your Kubernetes cluster
 
@@ -57,24 +63,17 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --options=options-kubernetes-update-cluster${i}.json --yes
 done
 
-# 3. Upgrade your Kubernetes cluster
+# 3. Expose a Kubernetes Application using a Service Type Load Balancer (L4)
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  sed "s/TOBEREPLACED/${i}/g" options-kubernetes-update-cluster.json.template > options-kubernetes-update-cluster${i}.json
-  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --package-version=stub-universe --yes
-done
-
-# 4. Expose a Kubernetes Application using a Service Type Load Balancer (L4)
-
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  kubectl create -f dklb-prereqs.yaml
-  kubectl create -f dklb-deployment.yaml
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} create -f dklb-prereqs.yaml
+  kubectl --kubeconfig=./config.cluster${i} create -f dklb-deployment.yaml
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 apiVersion: v1
 kind: Pod
 metadata:
@@ -93,8 +92,8 @@ EOF
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 apiVersion: v1
 kind: Service
 metadata:
@@ -116,29 +115,35 @@ spec:
 EOF
 done
 
-test=0
-while [ $test -lt $clusters ]; do
-  test=$(nc -z -v -w 1 $PUBLICIP 8001-80${clusters} 2>&1 | wc -l | awk '{print $1}')
-  echo $test
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  telnet $PUBLICIP 80${i} << EOF
+quit
+EOF
 done
 
-# 5. Expose a Kubernetes Application using an Ingress (L7)
+#test=0
+#while [ $test -lt $clusters ]; do
+#  test=$(nc -z -v -w 1 $PUBLICIP 8001-80${clusters} 2>&1 | wc -l | awk '{print $1}')
+#  echo $test
+#done
+
+# 4. Expose a Kubernetes Application using an Ingress (L7)
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  kubectl run --restart=Never --image hashicorp/http-echo --labels app=http-echo-1,owner=dklb --port 80 http-echo-1 -- -listen=:80 --text='Hello from http-echo-1!'
-  kubectl run --restart=Never --image hashicorp/http-echo --labels app=http-echo-2,owner=dklb --port 80 http-echo-2 -- -listen=:80 --text='Hello from http-echo-2!'
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} run --restart=Never --image hashicorp/http-echo --labels app=http-echo-1,owner=dklb --port 80 http-echo-1 -- -listen=:80 --text='Hello from http-echo-1!'
+  kubectl --kubeconfig=./config.cluster${i} run --restart=Never --image hashicorp/http-echo --labels app=http-echo-2,owner=dklb --port 80 http-echo-2 -- -listen=:80 --text='Hello from http-echo-2!'
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  kubectl expose pod http-echo-1 --port 80 --target-port 80 --type NodePort --name "http-echo-1"
-  kubectl expose pod http-echo-2 --port 80 --target-port 80 --type NodePort --name "http-echo-2"
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} expose pod http-echo-1 --port 80 --target-port 80 --type NodePort --name "http-echo-1"
+  kubectl --kubeconfig=./config.cluster${i} expose pod http-echo-2 --port 80 --target-port 80 --type NodePort --name "http-echo-2"
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -168,23 +173,24 @@ EOF
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   curl -H "Host: http-echo-${i}-1.com" http://${PUBLICIP}:90${i}
   curl -H "Host: http-echo-${i}-2.com" http://${PUBLICIP}:90${i}
 done
 
-# 6. Leverage persistent storage using Portworx
+# 5. Leverage persistent storage using Portworx
 
 ./check-status-with-name.sh portworx infra/storage/portworx
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  version=$(kubectl version --short | awk -Fv '/Server Version: / {print $3}')
-  kubectl apply -f "https://install.portworx.com/2.0?kbver=1.12.3&b=true&dcos=true&stork=true"
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  version=$(kubectl --kubeconfig=./config.cluster${i} version --short | awk -Fv '/Server Version: / {print $3}')
+  kubectl --kubeconfig=./config.cluster${i} apply -f "https://install.portworx.com/2.0?kbver=1.12.3&b=true&dcos=true&stork=true"
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 kind: StorageClass
 apiVersion: storage.k8s.io/v1beta1
 metadata:
@@ -196,13 +202,13 @@ EOF
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  kubectl patch storageclass portworx-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} patch storageclass portworx-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
@@ -219,8 +225,8 @@ EOF
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 apiVersion: v1
 kind: Pod
 metadata:
@@ -242,13 +248,18 @@ EOF
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  kubectl delete pod pvpod
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} exec pvpod -- /bin/sh -c "echo test > /test-portworx-volume/test"
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} delete pod pvpod
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 apiVersion: v1
 kind: Pod
 metadata:
@@ -270,21 +281,90 @@ EOF
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  kubectl exec -i pvpod cat /test-portworx-volume/test
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} exec pvpod cat /test-portworx-volume/test;
 done
 
-# 7. Leverage persistent storage using CSI
+# 6. Configure Helm
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  sleep 1
-  kubectl apply -f csi-driver-deployments-master/aws-ebs/kubernetes/latest/
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiller
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: tiller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: tiller
+  namespace: kube-system
+EOF
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  helm --kubeconfig=./config.cluster${i} init --service-account tiller
+done
+
+# 7. Deploy Istio using Helm
+
+export PATH=$PWD/istio-1.0.5/bin:$PATH
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  helm --kubeconfig=./config.cluster${i} install istio-1.0.5/install/kubernetes/helm/istio --name istio --namespace istio-system \
+  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb \
+  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-size"=\"2\" \
+  --set gateways.istio-ingressgateway.ports[0].port=100${i} \
+  --set gateways.istio-ingressgateway.ports[0].targetPort=80 \
+  --set gateways.istio-ingressgateway.ports[0].name=http2 \
+  --set gateways.istio-ingressgateway.ports[0].nodePort=30000
+done
+
+# 8. Deploy an application on Istio
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} apply -f <(istioctl --kubeconfig=./config.cluster${i} kube-inject -f istio-1.0.5/samples/bookinfo/platform/kube/bookinfo.yaml)
+  kubectl --kubeconfig=./config.cluster${i} apply -f istio-1.0.5/samples/bookinfo/networking/bookinfo-gateway.yaml
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  curl -I http://${PUBLICIP}:100${i}/productpage
+done
+
+# 9. Upgrade your Kubernetes cluster
+
+dcos kubernetes manager update start --package-version=stub-universe
+
+sleep 30
+
+dcos kubernetes manager update status
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --package-version=stub-universe --yes
+done
+
+# 10. Leverage persistent storage using CSI
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} apply -f csi-driver-deployments-master/aws-ebs/kubernetes/latest/
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
@@ -301,8 +381,8 @@ EOF
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -318,8 +398,8 @@ EOF
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -352,76 +432,19 @@ EOF
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  pod=$(kubectl get pods | grep ebs-dynamic-app | awk '{ print $1 }')
-  kubectl exec -i $pod cat /data/out.txt
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  pod=$(kubectl --kubeconfig=./config.cluster${i} get pods | grep ebs-dynamic-app | awk '{ print $1 }')
+  kubectl --kubeconfig=./config.cluster${i} exec -i $pod cat /data/out.txt
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  pod=$(kubectl get pods | grep ebs-dynamic-app | awk '{ print $1 }')
-  kubectl delete pod $pod
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  pod=$(kubectl --kubeconfig=./config.cluster${i} get pods | grep ebs-dynamic-app | awk '{ print $1 }')
+  kubectl --kubeconfig=./config.cluster${i} delete pod $pod
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  pod=$(kubectl get pods | grep ebs-dynamic-app | awk '{ print $1 }')
-  kubectl exec -i $pod cat /data/out.txt
-done
-
-# 8. Configure Helm
-
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  cat <<EOF | kubectl create -f -
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: tiller
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: tiller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: tiller
-  namespace: kube-system
-EOF
-done
-
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  helm init --service-account tiller
-done
-
-# 9. Deploy Istio using Helm
-
-export PATH=$PWD/istio-1.0.5/bin:$PATH
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  helm install istio-1.0.5/install/kubernetes/helm/istio --name istio --namespace istio-system \
-  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb \
-  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-size"=\"2\" \
-  --set gateways.istio-ingressgateway.ports[0].port=100${i} \
-  --set gateways.istio-ingressgateway.ports[0].targetPort=80 \
-  --set gateways.istio-ingressgateway.ports[0].name=http2 \
-  --set gateways.istio-ingressgateway.ports[0].nodePort=30000
-done
-
-# 10. Deploy an application on Istio
-
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  kubectl config use-context training-prod-k8s-cluster${i}
-  kubectl apply -f <(istioctl kube-inject -f istio-1.0.5/samples/bookinfo/platform/kube/bookinfo.yaml)
-  kubectl apply -f istio-1.0.5/samples/bookinfo/networking/bookinfo-gateway.yaml
-done
-
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  curl -I http://${PUBLICIP}:100${i}/productpage
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  pod=$(kubectl --kubeconfig=./config.cluster${i} get pods | grep ebs-dynamic-app | awk '{ print $1 }')
+  kubectl --kubeconfig=./config.cluster${i} exec -i $pod cat /data/out.txt
 done

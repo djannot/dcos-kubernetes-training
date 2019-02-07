@@ -123,7 +123,7 @@ dcos security org users grant ${serviceaccount} dcos:mesos:master:volume:role:sl
 dcos security org users grant ${serviceaccount} dcos:mesos:master:framework:role:slave_public read
 dcos security org users grant ${serviceaccount} dcos:mesos:agent:framework:role:slave_public read
 
-dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${1}.json --package-version=2.0.0-1.12.1
+dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${1}.json --package-version=2.0.0-1.12.5
 ```
 
 It will allow you to create the DC/OS service account with the right permissions and to deploy a Kubernetes cluster with the version 1.12.1.
@@ -149,9 +149,9 @@ Run the following command to check that everything is working properly:
 ```
 kubectl get nodes
 NAME                                                           STATUS   ROLES    AGE   VERSION
-kube-control-plane-0-instance.trainingprodk8scluster${CLUSTER}.mesos   Ready    master   23m   v1.12.1
-kube-node-0-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   21m   v1.12.1
-kube-node-1-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   21m   v1.12.1
+kube-control-plane-0-instance.trainingprodk8scluster${CLUSTER}.mesos   Ready    master   23m   v1.12.5
+kube-node-0-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   21m   v1.12.5
+kube-node-1-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   21m   v1.12.5
 ```
 
 Copy the Kubernetes config file in your current directory
@@ -195,29 +195,7 @@ You can check that the new node is shown in the Kubernetes Dashboard:
 
 ![Kubernetes dashboard scaled](images/kubernetes-dashboard-scaled.png)
 
-## 3. Upgrade your Kubernetes cluster
-
-Run the following command to upgrade your Kubernetes cluster:
-
-Run the following command to upgrade your cluster:
-
-```
-dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${CLUSTER} --package-version=stub-universe --yes
-
-```
-
-You can check that the cluster has been updated using the Kubernete CLI:
-
-```
-kubectl get nodes
-NAME                                                          STATUS   ROLES    AGE   VERSION
-kube-control-plane-0-instance.trainingprodk8scluster${CLUSTER}.mesos   Ready    master   94m   v1.13.2-1+3ac0971ac54945
-kube-node-0-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   92m   v1.13.2-1+3ac0971ac54945
-kube-node-1-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   92m   v1.13.2-1+3ac0971ac54945
-kube-node-2-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   36m   v1.13.2-1+3ac0971ac54945
-```
-
-## 4. Expose a Kubernetes Application using a Service Type Load Balancer (L4)
+## 3. Expose a Kubernetes Application using a Service Type Load Balancer (L4)
 
 This feature leverage the DC/OS EdgeLB and a new service called dklb.
 
@@ -289,7 +267,9 @@ Connected to ec2-34-227-199-197.compute-1.amazonaws.com.
 Escape character is '^]'.
 ```
 
-## 5. Expose a Kubernetes Application using an Ingress (L7)
+## 4. Expose a Kubernetes Application using an Ingress (L7)
+
+Update the PUBLICIP environment variable to use the Public IP of one of the DC/OS public node. It's needed because there is a limited number of listeners we can set on the AWS Load Balancer we use in front of the DC/OS public nodes.
 
 This feature leverage the DC/OS EdgeLB and the dklb service that has been deployed in the previous section.
 
@@ -348,7 +328,7 @@ curl -H "Host: http-echo-${CLUSTER}-1.com" http://${PUBLICIP}:90${CLUSTER}
 curl -H "Host: http-echo-${CLUSTER}-2.com" http://${PUBLICIP}:90${CLUSTER}
 ```
 
-## 6. Leverage persistent storage using Portworx
+## 5. Leverage persistent storage using Portworx
 
 Portworx is a Software Defined Software that can use the local storage of the DC/OS nodes to provide High Available persistent storage to both Kubernetes pods and DC/OS services.
 
@@ -490,7 +470,122 @@ Validate that the file created in the previous Pod is still available:
 kubectl exec -i pvpod cat /test-portworx-volume/test
 ```
 
-## 7. Leverage persistent storage using CSI
+## 6. Configure Helm
+
+Helm is a package manager for Kubernetes. Helm Charts helps you define, install, and upgrade even the most complex Kubernetes application.
+
+Intall Helm on your laptop using the instructions available at the URL below:
+
+[https://docs.helm.sh/using_helm/#installing-helm](https://docs.helm.sh/using_helm/#installing-helm)
+
+Tiller is the in-cluster component of Helm. It interacts directly with the Kubernetes API server to install, upgrade, query, and remove Kubernetes resources. It also stores the objects that represent releases.
+
+Run the following command to create a Kubernetes ServiceAccount for the Helm Tiller:
+
+```
+cat <<EOF | kubectl create -f -
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tiller
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: tiller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: tiller
+  namespace: kube-system
+EOF
+```
+
+Run the following command to install Tiller into your Kubernetes cluster:
+
+```
+helm init --service-account tiller
+```
+
+## 7. Deploy Istio using Helm
+
+Cloud platforms provide a wealth of benefits for the organizations that use them. There’s no denying, however, that adopting the cloud can put strains on DevOps teams. Developers must use microservices to architect for portability, meanwhile operators are managing extremely large hybrid and multi-cloud deployments. Istio lets you connect, secure, control, and observe services.
+
+At a high level, Istio helps reduce the complexity of these deployments, and eases the strain on your development teams. It is a completely open source service mesh that layers transparently onto existing distributed applications. It is also a platform, including APIs that let it integrate into any logging platform, or telemetry or policy system. Istio’s diverse feature set lets you successfully, and efficiently, run a distributed microservice architecture, and provides a uniform way to secure, connect, and monitor microservices.
+
+Download the latest release of Istio usign the followig command:
+
+```
+curl -L https://git.io/getLatestIstio | sh -
+```
+
+You can also download the releases for other Operating Systems using the URL below:
+
+[https://github.com/istio/istio/releases](https://github.com/istio/istio/releases)
+
+Run the following commands to go to the Istio directory and to install Istio using Helm:
+
+```
+cd istio-1.0.5
+export PATH=$PWD/bin:$PATH
+helm install install/kubernetes/helm/istio --name istio --namespace istio-system \
+  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb \
+  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-size"=\"2\" \
+  --set gateways.istio-ingressgateway.ports[0].port=100${CLUSTER} \
+  --set gateways.istio-ingressgateway.ports[0].targetPort=80 \
+  --set gateways.istio-ingressgateway.ports[0].name=http2 \
+  --set gateways.istio-ingressgateway.ports[0].nodePort=30000
+```
+
+## 8. Deploy an application on Istio
+
+This example deploys a sample application composed of four separate microservices used to demonstrate various Istio features. The application displays information about a book, similar to a single catalog entry of an online book store. Displayed on the page is a description of the book, book details (ISBN, number of pages, and so on), and a few book reviews.
+
+Run the following commands to deploy the bookinfo application:
+
+```
+kubectl apply -f <(istioctl kube-inject -f samples/bookinfo/platform/kube/bookinfo.yaml)
+kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
+```
+
+Go to the following URL to access the application:
+[http://${PUBLICIP}:100${CLUSTER}/productpage](http://${PUBLICIP}:100${CLUSTER}/productpage)
+
+You can then follow the other steps described in the Istio documentation to understand the different Istio features:
+
+[https://istio.io/docs/examples/bookinfo/](https://istio.io/docs/examples/bookinfo/)
+
+## 9. Upgrade your Kubernetes cluster
+
+Before performing this step, wait for the instructor to update the MKE package
+
+Run the following command to upgrade your Kubernetes cluster:
+
+Run the following command to upgrade your cluster:
+
+```
+dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${CLUSTER} --package-version=stub-universe --yes
+
+```
+
+You can check that the cluster has been updated using the Kubernete CLI:
+
+```
+kubectl get nodes
+NAME                                                          STATUS   ROLES    AGE   VERSION
+kube-control-plane-0-instance.trainingprodk8scluster${CLUSTER}.mesos   Ready    master   94m   v1.13.2-1+3ac0971ac54945
+kube-node-0-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   92m   v1.13.2-1+3ac0971ac54945
+kube-node-1-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   92m   v1.13.2-1+3ac0971ac54945
+kube-node-2-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   36m   v1.13.2-1+3ac0971ac54945
+```
+
+## 10. Leverage persistent storage using CSI
+
+This step can only be performed after you have upgraded your cluster because it needs Kubernetes 1.13.x.
 
 Unzip the archive containing the CSI driver for AWS:
 
@@ -599,93 +694,3 @@ Check the content of the file /data/out.txt and verify that the first timestamp 
 pod=$(kubectl get pods | grep ebs-dynamic-app | awk '{ print $1 }')
 kubectl exec -i $pod cat /data/out.txt
 ```
-
-## 8. Configure Helm
-
-Helm is a package manager for Kubernetes. Helm Charts helps you define, install, and upgrade even the most complex Kubernetes application.
-
-Intall Helm on your laptop using the instructions available at the URL below:
-
-[https://docs.helm.sh/using_helm/#installing-helm](https://docs.helm.sh/using_helm/#installing-helm)
-
-Tiller is the in-cluster component of Helm. It interacts directly with the Kubernetes API server to install, upgrade, query, and remove Kubernetes resources. It also stores the objects that represent releases.
-
-Run the following command to create a Kubernetes ServiceAccount for the Helm Tiller:
-
-```
-cat <<EOF | kubectl create -f -
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: tiller
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: tiller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: ServiceAccount
-  name: tiller
-  namespace: kube-system
-EOF
-```
-
-Run the following command to install Tiller into your Kubernetes cluster:
-
-```
-helm init --service-account tiller
-```
-
-## 9. Deploy Istio using Helm
-
-Cloud platforms provide a wealth of benefits for the organizations that use them. There’s no denying, however, that adopting the cloud can put strains on DevOps teams. Developers must use microservices to architect for portability, meanwhile operators are managing extremely large hybrid and multi-cloud deployments. Istio lets you connect, secure, control, and observe services.
-
-At a high level, Istio helps reduce the complexity of these deployments, and eases the strain on your development teams. It is a completely open source service mesh that layers transparently onto existing distributed applications. It is also a platform, including APIs that let it integrate into any logging platform, or telemetry or policy system. Istio’s diverse feature set lets you successfully, and efficiently, run a distributed microservice architecture, and provides a uniform way to secure, connect, and monitor microservices.
-
-Download the latest release of Istio usign the followig command:
-
-```
-curl -L https://git.io/getLatestIstio | sh -
-```
-
-You can also download the releases for other Operating Systems using the URL below:
-
-[https://github.com/istio/istio/releases](https://github.com/istio/istio/releases)
-
-Run the following commands to go to the Istio directory and to install Istio using Helm:
-
-```
-cd istio-1.0.5
-export PATH=$PWD/bin:$PATH
-helm install install/kubernetes/helm/istio --name istio --namespace istio-system \
-  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb \
-  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-size"=\"2\" \
-  --set gateways.istio-ingressgateway.ports[0].port=100${CLUSTER} \
-  --set gateways.istio-ingressgateway.ports[0].targetPort=80 \
-  --set gateways.istio-ingressgateway.ports[0].name=http2 \
-  --set gateways.istio-ingressgateway.ports[0].nodePort=30000
-```
-
-## 10. Deploy an application on Istio
-
-This example deploys a sample application composed of four separate microservices used to demonstrate various Istio features. The application displays information about a book, similar to a single catalog entry of an online book store. Displayed on the page is a description of the book, book details (ISBN, number of pages, and so on), and a few book reviews.
-
-Run the following commands to deploy the bookinfo application:
-
-```
-kubectl apply -f <(istioctl kube-inject -f samples/bookinfo/platform/kube/bookinfo.yaml)
-kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
-```
-
-Go to the following URL to access the application:
-[http://${PUBLICIP}:100${CLUSTER}/productpage](http://${PUBLICIP}:100${CLUSTER}/productpage)
-
-You can then follow the other steps described in the Istio documentation to understand the different Istio features:
-
-[https://istio.io/docs/examples/bookinfo/](https://istio.io/docs/examples/bookinfo/)
-

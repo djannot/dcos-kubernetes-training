@@ -7,7 +7,7 @@
   "kubernetes": {
     "authorization_mode": "RBAC",
     "high_availability": false,
-    "private_node_count": 2,
+    "private_node_count": 3,
     "private_reserved_resources": {
       "kube_mem": 4096
     }

@@ -1,15 +1,13 @@
 clusters=$1
+publicnodes=$(dcos node --json | jq --raw-output ".[] | select((.type | test(\"agent\")) and (.attributes.public_ip != null)) | .id" | wc -l | awk '{ print $1 }')
 cat <<EOF > pool-edgelb-all.json
 {
    "apiVersion":"V2",
    "name":"all",
    "namespace":"infra/network/dcos-edgelb/pools",
-   "count":2,
+   "count":${publicnodes},
    "autoCertificate":true,
    "haproxy":{
-      "stats":{
-         "bindPort":9091
-      },
       "frontends":[
          {
             "bindPort":8443,
