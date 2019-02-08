@@ -8,6 +8,9 @@ cat <<EOF > pool-edgelb-all.json
    "count":${publicnodes},
    "autoCertificate":true,
    "haproxy":{
+      "stats":{
+         "bindPort":9090
+      },
       "frontends":[
          {
             "bindPort":8443,
