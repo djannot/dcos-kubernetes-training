@@ -1,12 +1,18 @@
+# Pre requisites
+
 export APPNAME=training
-export PUBLICIP=3.92.59.16
+export PUBLICIP=100.24.222.54
+export CLUSTER=djannot
+export REGION=us-east-1
 clusters=3
-loadbalancer=ext-djannot
+
+loadbalancer=ext-$CLUSTER
+eval $(maws login 110465657741_Mesosphere-PowerUser)
 # The group ID of the AWS Security Group of the DC/OS public nodes
-group=sg-0cd4ff71f6dbc2ac0
+group=$(aws --region=$REGION ec2 describe-instances |  jq --raw-output ".Reservations[].Instances[] | select((.Tags | length) > 0) | select(.Tags[].Value | test(\"${CLUSTER}-publicagent\")) | select(.State.Name | test(\"running\")) | .SecurityGroups[] | [.GroupName, .GroupId] | \"\(.[0]) \(.[1])\"" | grep public-agents-lb-firewall | awk '{ print $2 }' | sort -u)
 
 ./create-and-attach-volumes.sh
-# If clusters < 10, then use 01, 02, ...
+./create-csi-iam-policy.sh
 ./update-aws-network-configuration.sh ${clusters} ${loadbalancer} ${group}
 
 dcos package install --yes --cli dcos-enterprise-cli
@@ -19,6 +25,16 @@ sed "s/NODES/${nodes}/g" options-portworx.json.template > options-portworx.json
 ./deploy-kubernetes-mke.sh
 ./check-kubernetes-mke-status.sh
 
+./create-pool-edgelb-all.sh ${clusters}
+./deploy-edgelb.sh
+./check-app-status.sh infra/network/dcos-edgelb/pools/all
+
+sed "/mesos.lab/d" /etc/hosts > ./hosts
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "$PUBLICIP ${APPNAME}.prod.k8s.cluster${i}.mesos.lab" >>./hosts
+done
+sudo mv hosts /etc/hosts
+
 # 1. Deploy a Kubernetes cluster
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
@@ -29,16 +45,6 @@ done
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   ./check-kubernetes-cluster-status.sh ${APPNAME}/prod/k8s/cluster${i}
 done
-
-./create-pool-edgelb-all.sh ${clusters}
-./deploy-edgelb.sh
-./check-app-status.sh infra/network/dcos-edgelb/pools/all
-
-sed "/mesos.lab/d" /etc/hosts > ./hosts
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  echo "$PUBLICIP ${APPNAME}.prod.k8s.cluster${i}.mesos.lab" >>./hosts
-done
-sudo mv hosts /etc/hosts
 
 if [ -f ~/.kube/config ]; then
   mv ~/.kube/config ~/.kube/config.ori
@@ -117,6 +123,32 @@ spec:
     targetPort: 6379
 EOF
 done
+
+## DCOS Authentication (not part of the training)
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: djannot@gmail.com
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: User
+  name: djannot@gmail.com
+  namespace: kube-system
+EOF
+done
+
+kubectl --kubeconfig=./config.cluster${i} get pods --token=$(dcos config show core.dcos_acs_token)
+
+kubectl --kubeconfig=./config.cluster${i} --token=$(dcos config show core.dcos_acs_token) proxy
+
+# Sample Configurations
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   telnet $PUBLICIP 80${i} << EOF

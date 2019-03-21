@@ -26,6 +26,13 @@ dcos security org users grant ${serviceaccount} dcos:mesos:master:task:app_id fu
 dcos security org users grant ${serviceaccount} dcos:adminrouter:service:${path}/pools/all full
 dcos security org users grant ${serviceaccount} dcos:adminrouter:service:${path}/pools/dklb full
 
+#dcos security org users grant ${serviceaccount} dcos:superuser full
+#dcos security org users grant ${serviceaccount} dcos:secrets:list:default:/${path}/pools/* full
+
+#dcos package repo add --index=0 edgelb-aws https://edge-lb-infinity-artifacts.s3.amazonaws.com/saved/v1.3.0-64-ge212e66/edgelb/stub-universe-edgelb.json
+#dcos package repo add --index=0 edgelb-pool-aws https://edge-lb-infinity-artifacts.s3.amazonaws.com/saved/v1.3.0-64-ge212e66/edgelb-pool/stub-universe-edgelb-pool.json
+#dcos package install --yes edgelb --options=options-edgelb.json --package-version=v1.3.0-64-ge212e66
+
 dcos package repo add --index=0 edgelb-aws https://downloads.mesosphere.com/edgelb/v1.3.0/assets/stub-universe-edgelb.json
 dcos package repo add --index=0 edgelb-pool-aws https://downloads.mesosphere.com/edgelb-pool/v1.3.0/assets/stub-universe-edgelb-pool.json
 dcos package install --yes edgelb --options=options-edgelb.json --package-version=v1.3.0

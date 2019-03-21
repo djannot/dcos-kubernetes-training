@@ -29,3 +29,4 @@ dcos security org users grant ${serviceaccount} dcos:mesos:master:framework:role
 dcos security org users grant ${serviceaccount} dcos:mesos:agent:framework:role:slave_public read
 
 dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${1}.json --package-version=2.1.1-1.12.5
+#dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${1}.json --package-version=2.2.0-1.13.3

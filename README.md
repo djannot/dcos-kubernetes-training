@@ -27,6 +27,34 @@ The DC/OS EdgeLB package must be installed in the cluster. This package is used 
 
 Portworx must be deployed on the DC/OS cluster.
 
+For CSI, you need to attach the following inline IAM policy to your AWS instance role:
+
+```
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "ec2:AttachVolume",
+        "ec2:CreateSnapshot",
+        "ec2:CreateTags",
+        "ec2:CreateVolume",
+        "ec2:DeleteSnapshot",
+        "ec2:DeleteTags",
+        "ec2:DeleteVolume",
+        "ec2:DescribeInstances",
+        "ec2:DescribeSnapshots",
+        "ec2:DescribeTags",
+        "ec2:DescribeVolumes",
+        "ec2:DetachVolume"
+      ],
+      "Resource": "*"
+    }
+  ]
+}
+```
+
 Run the following command to export the environment variables needed during the labs:
 
 ```
