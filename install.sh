@@ -1,7 +1,7 @@
 # Pre requisites
 
 export APPNAME=training
-export PUBLICIP=100.26.37.55
+export PUBLICIP=52.20.209.226
 export CLUSTER=djannot
 export REGION=us-east-1
 clusters=3

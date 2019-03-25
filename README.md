@@ -15,7 +15,7 @@ During this training, you'll learn how to use the main capabilities of Kubernete
 - Deploy Istio using Helm
 - Deploy an application on Istio
 
-During the labs, replace X by the number assigned by the instructor (starting with 00).
+During the labs, replace X by the number assigned by the instructor (starting with 01).
 
 ## Pre requisites
 
