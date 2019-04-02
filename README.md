@@ -675,7 +675,7 @@ At a high level, Istio helps reduce the complexity of these deployments, and eas
 Download the latest release of Istio usign the followig command:
 
 ```
-curl -L https://git.io/getLatestIstio | sh -
+curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.6 sh -
 ```
 
 You can also download the releases for other Operating Systems using the URL below:
