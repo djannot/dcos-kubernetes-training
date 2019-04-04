@@ -146,10 +146,10 @@ dcos security org users grant ${serviceaccount} dcos:mesos:master:volume:role:sl
 dcos security org users grant ${serviceaccount} dcos:mesos:master:framework:role:slave_public read
 dcos security org users grant ${serviceaccount} dcos:mesos:agent:framework:role:slave_public read
 
-dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${1}.json --package-version=2.1.1-1.12.5
+dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${1}.json --package-version=2.2.1-1.13.4
 ```
 
-It will allow you to create the DC/OS service account with the right permissions and to deploy a Kubernetes cluster with the version 1.12.5.
+It will allow you to create the DC/OS service account with the right permissions and to deploy a Kubernetes cluster with the version 1.13.4.
 
 Deploy your Kubernetes cluster using the following command:
 
@@ -172,9 +172,9 @@ Run the following command to check that everything is working properly:
 ```
 kubectl get nodes
 NAME                                                           STATUS   ROLES    AGE   VERSION
-kube-control-plane-0-instance.trainingprodk8scluster${CLUSTER}.mesos   Ready    master   23m   v1.12.5
-kube-node-0-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   21m   v1.12.5
-kube-node-1-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   21m   v1.12.5
+kube-control-plane-0-instance.trainingprodk8scluster${CLUSTER}.mesos   Ready    master   23m   v1.13.4
+kube-node-0-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   21m   v1.13.4
+kube-node-1-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   21m   v1.13.4
 ```
 
 Copy the Kubernetes config file in your current directory
@@ -225,7 +225,7 @@ Run the following command to upgrade your Kubernetes cluster:
 Run the following command to upgrade your cluster:
 
 ```
-dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${CLUSTER} --package-version=2.2.0-1.13.3 --yes
+dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${CLUSTER} --package-version=2.2.2-1.13.5 --yes
 
 ```
 
@@ -234,10 +234,10 @@ You can check that the cluster has been updated using the Kubernete CLI:
 ```
 kubectl get nodes
 NAME                                                          STATUS   ROLES    AGE   VERSION
-kube-control-plane-0-instance.trainingprodk8scluster${CLUSTER}.mesos   Ready    master   94m   v1.13.3
-kube-node-0-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   92m   v1.13.3
-kube-node-1-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   92m   v1.13.3
-kube-node-2-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   36m   v1.13.3
+kube-control-plane-0-instance.trainingprodk8scluster${CLUSTER}.mesos   Ready    master   94m   v1.13.5
+kube-node-0-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   92m   v1.13.5
+kube-node-1-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   92m   v1.13.5
+kube-node-2-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   36m   v1.13.5
 ```
 
 ## 4. Expose a Kubernetes Application using a Service Type Load Balancer (L4)

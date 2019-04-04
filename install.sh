@@ -1,7 +1,7 @@
 # Pre requisites
 
 export APPNAME=training
-export PUBLICIP=52.20.209.226
+export PUBLICIP=18.206.144.206
 export CLUSTER=djannot
 export REGION=us-east-1
 clusters=3
@@ -69,8 +69,32 @@ done
 # 3. Upgrade your Kubernetes cluster
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --package-version=2.2.0-1.13.3 --yes
+  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --package-version=2.2.2-1.13.5 --yes
 done
+
+## DCOS Authentication (not part of the training)
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: djannot@gmail.com
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+- kind: User
+  name: djannot@gmail.com
+  namespace: kube-system
+EOF
+done
+
+kubectl --kubeconfig=./config.cluster${i} get pods --token=$(dcos config show core.dcos_acs_token)
+
+kubectl --kubeconfig=./config.cluster${i} --token=$(dcos config show core.dcos_acs_token) proxy
 
 # 4. Expose a Kubernetes Application using a Service Type Load Balancer (L4)
 
@@ -123,30 +147,6 @@ spec:
     targetPort: 6379
 EOF
 done
-
-## DCOS Authentication (not part of the training)
-
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
-  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: djannot@gmail.com
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-- kind: User
-  name: djannot@gmail.com
-  namespace: kube-system
-EOF
-done
-
-kubectl --kubeconfig=./config.cluster${i} get pods --token=$(dcos config show core.dcos_acs_token)
-
-kubectl --kubeconfig=./config.cluster${i} --token=$(dcos config show core.dcos_acs_token) proxy
 
 # Sample Configurations
 
@@ -480,4 +480,44 @@ done
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   curl -I http://${PUBLICIP}:100${i}/productpage
+done
+
+# 11. Deploy Knative
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} apply --filename https://github.com/knative/serving/releases/download/v0.4.0/serving.yaml \
+     --filename https://github.com/knative/build/releases/download/v0.4.0/build.yaml \
+     --filename https://github.com/knative/eventing/releases/download/v0.4.0/release.yaml \
+     --filename https://github.com/knative/eventing-sources/releases/download/v0.4.0/release.yaml \
+     --filename https://github.com/knative/serving/releases/download/v0.4.0/monitoring.yaml \
+     --filename https://raw.githubusercontent.com/knative/serving/v0.4.0/third_party/config/build/clusterrole.yaml
+done
+
+# 11. Deploy an application on Knative
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} apply -f -
+apiVersion: serving.knative.dev/v1alpha1 # Current version of Knative
+kind: Service
+metadata:
+  name: helloworld-go # The name of the app
+  namespace: default # The namespace the app will use
+spec:
+  runLatest:
+    configuration:
+      revisionTemplate:
+        spec:
+          container:
+            image: gcr.io/knative-samples/helloworld-go # The URL to the image of the app
+            env:
+              - name: TARGET # The environment variable printed out by the sample app
+                value: "Go Sample v1"
+EOF
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  curl -H "Host: helloworld-go.default.example.com" http://${PUBLICIP}:100${i}
 done
