@@ -58,7 +58,7 @@ sudo mv hosts /etc/hosts
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   sed "s/TOBEREPLACED/${i}/g" scripts/options-kubernetes-cluster.json.template > scripts/options-kubernetes-cluster${i}.json
-  ./scripts/deploy-kubernetes-cluster.sh $i
+  ./scripts/deploy-kubernetes-cluster.sh ${i}
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
@@ -493,23 +493,23 @@ subjects:
 EOF
 done
 
-## Sleeping 150 seconds to let the tiller spin up
-sleep 150
-
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   helm --kubeconfig=./config.cluster${i} init --service-account tiller
 done
 
+## Sleeping 120 seconds to let the tiller spin up
+sleep 120
+
 # 9. Deploy Istio using Helm
 
-#curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.6 sh -
+curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.6 sh -
 
 export PATH=$PWD/istio-1.0.6/bin:$PATH
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   helm --kubeconfig=./config.cluster${i} install istio-1.0.6/install/kubernetes/helm/istio --name istio --namespace istio-system \
-  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb \
+  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb${i} \
   --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-size"=\"2\" \
   --set gateways.istio-ingressgateway.ports[0].port=100${i} \
   --set gateways.istio-ingressgateway.ports[0].targetPort=80 \
@@ -525,7 +525,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   kubectl --kubeconfig=./config.cluster${i} apply -f istio-1.0.6/samples/bookinfo/networking/bookinfo-gateway.yaml
 done
 
-## Sleeping 30 seconds to let knative spin up
+## Sleeping 30 seconds to let the Istio application spin up
 sleep 30
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
@@ -545,8 +545,8 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
      --filename https://raw.githubusercontent.com/knative/serving/v0.4.0/third_party/config/build/clusterrole.yaml
 done
 
-## Sleeping 60 seconds to let knative spin up
-sleep 60
+## Sleeping 150 seconds to let knative spin up
+sleep 150
 
 # 11. Deploy an application on Knative
 

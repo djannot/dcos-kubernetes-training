@@ -35,7 +35,7 @@ dcos security org users grant ${serviceaccount} dcos:adminrouter:service:${path}
 
 dcos package repo add --index=0 edgelb-aws https://downloads.mesosphere.com/edgelb/v1.3.0/assets/stub-universe-edgelb.json
 dcos package repo add --index=0 edgelb-pool-aws https://downloads.mesosphere.com/edgelb-pool/v1.3.0/assets/stub-universe-edgelb-pool.json
-dcos package install --yes edgelb --options=options-edgelb.json --package-version=v1.3.0
+dcos package install --yes edgelb --options=scripts/options-edgelb.json --package-version=v1.3.0
 
 sleep 10
 until dcos edgelb ping; do sleep 1; done

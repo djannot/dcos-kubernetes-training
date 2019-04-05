@@ -77,7 +77,7 @@ Run the following command to export the environment variables needed during the 
 
 ```
 export APPNAME=training
-export PUBLICIP=$(dcos task exec -it dcos-edgelb.pools.all__edgelb-pool-0-server__ curl ifconfig.co | tr -d '\r' | tr -d '\n')
+export PUBLICIP=<PUBLIC IP PROVIDED BY INSTRUCTOR>
 export CLUSTER=<the number assigned by the instructor: 01, 02, ..>
 ```
 

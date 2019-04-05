@@ -14,4 +14,4 @@ dcos security org users grant dcos_marathon dcos:mesos:master:task:user:root cre
 dcos security org users create -p password portworx
 dcos security org users grant portworx dcos:secrets:default:/infra/storage/portworx/secrets/* full
 
-dcos package install --yes portworx --options=options-portworx.json --package-version=1.3.5-2.0.3
+dcos package install --yes portworx --options=scripts/options-portworx.json --package-version=1.3.5-2.0.3
