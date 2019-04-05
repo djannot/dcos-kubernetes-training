@@ -159,7 +159,7 @@ dcos security org service-accounts keypair private-${serviceaccount}.pem public-
 dcos security org service-accounts delete ${serviceaccount}
 dcos security org service-accounts create -p public-${serviceaccount}.pem -d /${clusterpath} ${serviceaccount}
 dcos security secrets delete /${clusterpath}/private-${serviceaccount}
->dcos security secrets create-sa-secret --strict private-${serviceaccount}.pem ${serviceaccount} /${clusterpath}/private-${serviceaccount}
+dcos security secrets create-sa-secret --strict private-${serviceaccount}.pem ${serviceaccount} /${clusterpath}/private-${serviceaccount}
 
 dcos security org users grant ${serviceaccount} dcos:secrets:default:/${clusterpath}/* full
 dcos security org users grant ${serviceaccount} dcos:secrets:list:default:/${clusterpath} full
@@ -1115,7 +1115,7 @@ helm init --service-account tiller
 
 ## <a name="deploy-istio"></a>9. Deploy Istio using Helm
 
-###PLEASE NOTE THAT THIS GUIDE CURRENTLY DOES NOT PROVIDE INSTRUCTIONS TO DEPLOY ISTIO ON WINDOWS WORKSTATIONS###
+PLEASE NOTE THAT THIS GUIDE CURRENTLY DOES NOT PROVIDE INSTRUCTIONS TO DEPLOY ISTIO ON WINDOWS WORKSTATIONS
 
 Cloud platforms provide a wealth of benefits for the organizations that use them. There’s no denying, however, that adopting the cloud can put strains on DevOps teams. Developers must use microservices to architect for portability, meanwhile operators are managing extremely large hybrid and multi-cloud deployments. Istio lets you connect, secure, control, and observe services.
 
