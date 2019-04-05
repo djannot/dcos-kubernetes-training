@@ -4,18 +4,18 @@
 
 During this training, you'll learn how to use the main capabilities of Kubernetes on DC/OS:
 
-- Deploy a Kubernetes cluster
-- Scale a Kubernetes cluster
-- Upgrade a Kubernetes cluster
-- Expose a Kubernetes Application using a Service Type Load Balancer (L4)
-- Expose a Kubernetes Application using an Ingress (L7)
-- Leverage persistent storage using Portworx
-- Leverage persistent storage using CSI
-- Configure Helm
-- Deploy Istio using Helm
-- Deploy an application on Istio
+- [Deploy a Kubernetes cluster](#deploy)
+- [Scale a Kubernetes cluster](#scale)
+- [Upgrade a Kubernetes cluster](#upgrade)
+- [Expose a Kubernetes Application using a Service Type Load Balancer (L4)](#exposel4)
+- [Expose a Kubernetes Application using an Ingress (L7)](#exposel7)
+- [Leverage persistent storage using Portworx](#portworx)
+- [Leverage persistent storage using CSI](#csi)
+- [Configure Helm](#helm)
+- [Deploy Istio using Helm](#deploy-istio)
+- [Deploy an application on Istio](#deploy-app)
 
-During the labs, replace X by the number assigned by the instructor (starting with 01).
+During the labs, replace XX by the number assigned by the instructor (starting with 01).
 
 ## Pre requisites
 
@@ -57,10 +57,19 @@ For CSI, you need to attach the following inline IAM policy to your AWS instance
 
 Run the following command to export the environment variables needed during the labs:
 
+For Linux & MacOS:
+
 ```
 export APPNAME=training
 export PUBLICIP=<IP provided by the instructor>
-export CLUSTER=<the number assigned by the instructor: 00, 01, ..>
+export CLUSTER=<the number assigned by the instructor: 01, 02, ..>
+```
+For Windows:
+
+```
+set APPNAME=training
+set PUBLICIP=<IP provided by the instructor>
+set CLUSTER=<the number assigned by the instructor: 01, 02, ..>
 ```
 
 Log into the DC/OS Kubernetes cluster with the information provided by your instructor and download the DC/OS CLI.
@@ -87,9 +96,11 @@ Add the following line to your /etc/hosts (or c:\Windows\System32\Drivers\etc\ho
 <PUBLICIP variable> training.prod.k8s.cluster<CLUSTER variable>.mesos.lab
 ```
 
-## 1. Deploy a Kubernetes cluster
+## <a name="deploy"></a>1. Deploy a Kubernetes cluster
 
-Create a file called options-kubernetes-cluster${CLUSTER}.json using the following command:
+Create a file called options-kubernetes-cluster${CLUSTER}.json using the following commands:
+
+For Linux & MacOS:
 
 ```
 cat <<EOF > options-kubernetes-cluster${CLUSTER}.json
@@ -111,24 +122,47 @@ cat <<EOF > options-kubernetes-cluster${CLUSTER}.json
 EOF
 ```
 
+For Windows:
+
+```
+set FILE=options-kubernetes-cluster%CLUSTER%.json
+>%FILE% echo {
+>>%FILE% echo   "service": {
+>>%FILE% echo     "name": "training/prod/k8s/cluster%CLUSTER%",
+>>%FILE% echo     "service_account": "training-prod-k8s-cluster%CLUSTER%",
+>>%FILE% echo     "service_account_secret": "/training/prod/k8s/cluster%CLUSTER%/private-training-prod-k8s-cluster%CLUSTER%"
+>>%FILE% echo   },
+>>%FILE% echo   "kubernetes": {
+>>%FILE% echo     "authorization_mode": "RBAC",
+>>%FILE% echo     "high_availability": false,
+>>%FILE% echo     "private_node_count": 2,
+>>%FILE% echo     "private_reserved_resources": {
+>>%FILE% echo     "kube_mem": 4096
+>>%FILE% echo     }
+>>%FILE% echo   }
+>>%FILE% echo }
+```
+
 It will allow you to deploy a Kubernetes cluster with RBAC enabled, HA disabled (to limit the resource needed) and with 2 private nodes.
+
+For Linux & MacOS:
 
 Create a file called deploy-kubernetes-cluster.sh with the following content:
 
 ```
-path=${APPNAME}/prod/k8s/cluster${1}
+clusterpath=${APPNAME}/prod/k8s/cluster${1}
 
-serviceaccount=$(echo $path | sed 's/\//-/g')
-role=$(echo $path | sed 's/\//__/g')-role
+serviceaccount=$(echo $clusterpath | sed 's/\//-/g')
+role=$(echo $clusterpath | sed 's/\//__/g')-role
 
 dcos security org service-accounts keypair private-${serviceaccount}.pem public-${serviceaccount}.pem
 dcos security org service-accounts delete ${serviceaccount}
-dcos security org service-accounts create -p public-${serviceaccount}.pem -d /${path} ${serviceaccount}
-dcos security secrets delete /${path}/private-${serviceaccount}
-dcos security secrets create-sa-secret --strict private-${serviceaccount}.pem ${serviceaccount} /${path}/private-${serviceaccount}
+dcos security org service-accounts create -p public-${serviceaccount}.pem -d /${clusterpath} ${serviceaccount}
+dcos security secrets delete /${clusterpath}/private-${serviceaccount}
+>dcos security secrets create-sa-secret --strict private-${serviceaccount}.pem ${serviceaccount} /${clusterpath}/private-${serviceaccount}
 
-dcos security org users grant ${serviceaccount} dcos:secrets:default:/${path}/* full
-dcos security org users grant ${serviceaccount} dcos:secrets:list:default:/${path} full
+dcos security org users grant ${serviceaccount} dcos:secrets:default:/${clusterpath}/* full
+dcos security org users grant ${serviceaccount} dcos:secrets:list:default:/${clusterpath} full
 dcos security org users grant ${serviceaccount} dcos:adminrouter:ops:ca:rw full
 dcos security org users grant ${serviceaccount} dcos:adminrouter:ops:ca:ro full
 dcos security org users grant ${serviceaccount} dcos:mesos:master:framework:role:${role} create
@@ -149,23 +183,79 @@ dcos security org users grant ${serviceaccount} dcos:mesos:agent:framework:role:
 dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${1}.json --package-version=2.2.1-1.13.4
 ```
 
-It will allow you to create the DC/OS service account with the right permissions and to deploy a Kubernetes cluster with the version 1.13.4.
+For Windows:
 
-Deploy your Kubernetes cluster using the following command:
+Create a file called deploy-kubernetes-cluster.bat with the following content:
 
 ```
-dcos package install kubernetes --cli
+set clusterpath=%APPNAME%/prod/k8s/cluster%1%
+set serviceaccount=%APPNAME%-prod-k8s-cluster%1%
+set role=%APPNAME%__prod__k8s__cluster%1%-role
+
+dcos security org service-accounts keypair private-%serviceaccount%.pem public-%serviceaccount%.pem
+dcos security org service-accounts delete %serviceaccount%
+dcos security org service-accounts create -p public-%serviceaccount%.pem -d /%clusterpath% %serviceaccount%
+dcos security secrets delete /%clusterpath%/private-%serviceaccount%
+dcos security secrets create-sa-secret --strict private-%serviceaccount%.pem %serviceaccount% /%clusterpath%/private-%serviceaccount%
+
+dcos security org users grant %serviceaccount% dcos:secrets:default:/%clusterpath%/* full
+dcos security org users grant %serviceaccount% dcos:secrets:list:default:/%clusterpath% full
+dcos security org users grant %serviceaccount% dcos:adminrouter:ops:ca:rw full
+dcos security org users grant %serviceaccount% dcos:adminrouter:ops:ca:ro full
+dcos security org users grant %serviceaccount% dcos:mesos:master:framework:role:%role% create
+dcos security org users grant %serviceaccount% dcos:mesos:master:reservation:role:%role% create
+dcos security org users grant %serviceaccount% dcos:mesos:master:reservation:principal:%serviceaccount% delete
+dcos security org users grant %serviceaccount% dcos:mesos:master:volume:role:%role% create
+dcos security org users grant %serviceaccount% dcos:mesos:master:volume:principal:%serviceaccount% delete
+dcos security org users grant %serviceaccount% dcos:mesos:master:task:user:nobody create
+dcos security org users grant %serviceaccount% dcos:mesos:master:task:user:root create
+dcos security org users grant %serviceaccount% dcos:mesos:agent:task:user:root create
+dcos security org users grant %serviceaccount% dcos:mesos:master:framework:role:slave_public/%role% create
+dcos security org users grant %serviceaccount% dcos:mesos:master:framework:role:slave_public/%role% read
+dcos security org users grant %serviceaccount% dcos:mesos:master:reservation:role:slave_public/%role% create
+dcos security org users grant %serviceaccount% dcos:mesos:master:volume:role:slave_public/%role% create
+dcos security org users grant %serviceaccount% dcos:mesos:master:framework:role:slave_public read
+dcos security org users grant %serviceaccount% dcos:mesos:agent:framework:role:slave_public read
+
+dcos kubernetes cluster create --yes --options=options-kubernetes-cluster%1%.json --package-version=2.2.1-1.13.4
+```
+
+It will allow you to create the DC/OS service account with the right permissions and to deploy a Kubernetes cluster with the version 1.13.4.
+
+Deploy your Kubernetes cluster using the following commands:
+
+For Linux & MacOS:
+
+```
+dcos package install kubernetes --cli --yes
 chmod +x deploy-kubernetes-cluster.sh
 ./deploy-kubernetes-cluster.sh ${CLUSTER}
 ```
 
+For Windows:
+
+```
+dcos package install kubernetes --cli --yes
+deploy-kubernetes-cluster.bat %CLUSTER%
+```
+
 Configure the Kubernetes CLI using the following command:
+
+For Linux & MacOS:
 
 ```
 dcos kubernetes cluster kubeconfig --context-name=${APPNAME}-prod-k8s-cluster${CLUSTER} --cluster-name=${APPNAME}/prod/k8s/cluster${CLUSTER} \
     --apiserver-url https://${APPNAME}.prod.k8s.cluster${CLUSTER}.mesos.lab:8443 \
     --insecure-skip-tls-verify
 ```
+For Windows:
+
+```
+dcos kubernetes cluster kubeconfig --context-name=%APPNAME%-prod-k8s-cluster%CLUSTER% --cluster-name=%APPNAME%/prod/k8s/cluster%CLUSTER% \
+    --apiserver-url https://%APPNAME%.prod.k8s.cluster%CLUSTER%.mesos.lab:8443 \
+    --insecure-skip-tls-verify
+```
+
 
 Run the following command to check that everything is working properly:
 
@@ -179,8 +269,16 @@ kube-node-1-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    
 
 Copy the Kubernetes config file in your current directory
 
+For Linux & MacOS:
+
 ```
 cp ~/.kube/config .
+```
+
+For Windows:
+
+```
+copy "%USERPROFILE%"\.kube\config .
 ```
 
 Run the following command **in a different shell** to run a proxy that will allow you to access the Kubernetes Dashboard:
@@ -197,18 +295,27 @@ Login using the config file.
 
 ![Kubernetes dashboard](images/kubernetes-dashboard.png)
 
-## 2. Scale your Kubernetes cluster
+## <a name="scale"></a>2. Scale your Kubernetes cluster
+
+Edit the options-kubernetes-clusterXX.json file to set the private_node_count to 3.
 
 Run the following command to scale your Kubernetes cluster:
 
-Edit the options-kubernetes-cluster${CLUSTER}.json file to set the private_node_count to 3.
-
-
-Run the following command to update your cluster:
+For Linux & MacOS:
 
 ```
 dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${CLUSTER} --options=options-kubernetes-cluster${CLUSTER}.json --yes
-Using Kubernetes cluster: training/prod/k8s/cluster1
+Using Kubernetes cluster: training/prod/k8s/clusterXX
+2019/01/26 14:40:51 starting update process...
+2019/01/26 14:40:58 waiting for update to finish...
+2019/01/26 14:42:10 update complete!
+```
+
+For Windows:
+
+```
+dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster%CLUSTER% --options=options-kubernetes-cluster%CLUSTER%.json --yes
+Using Kubernetes cluster: training/prod/k8s/clusterXX
 2019/01/26 14:40:51 starting update process...
 2019/01/26 14:40:58 waiting for update to finish...
 2019/01/26 14:42:10 update complete!
@@ -218,14 +325,21 @@ You can check that the new node is shown in the Kubernetes Dashboard:
 
 ![Kubernetes dashboard scaled](images/kubernetes-dashboard-scaled.png)
 
-## 3. Upgrade your Kubernetes cluster
+## <a name="upgrade"></a>3. Upgrade your Kubernetes cluster
 
 Run the following command to upgrade your Kubernetes cluster:
 
-Run the following command to upgrade your cluster:
+For Linux & MacOS:
 
 ```
 dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${CLUSTER} --package-version=2.2.2-1.13.5 --yes
+
+```
+
+For Windows:
+
+```
+dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster%CLUSTER% --package-version=2.2.2-1.13.5 --yes
 
 ```
 
@@ -240,7 +354,7 @@ kube-node-1-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    
 kube-node-2-kubelet.trainingprodk8scluster${CLUSTER}.mesos             Ready    <none>   36m   v1.13.5
 ```
 
-## 4. Expose a Kubernetes Application using a Service Type Load Balancer (L4)
+## <a name="exposel4"></a>4. Expose a Kubernetes Application using a Service Type Load Balancer (L4)
 
 This feature leverage the DC/OS EdgeLB and a new service called dklb.
 
@@ -256,6 +370,8 @@ You can use the Kubernetes Dashboard to check that the deployment dklb is runnin
 ![Kubernetes dashboard dklb](images/kubernetes-dashboard-dklb.png)
 
 You can now deploy a redis Pod on your Kubernetes cluster running the following command:
+
+For Linux & MacOS:
 
 ```
 cat <<EOF | kubectl create -f -
@@ -276,7 +392,30 @@ spec:
 EOF
 ```
 
+For Windows:
+
+```
+set FILE=redis.yml
+>%FILE% echo apiVersion: v1
+>>%FILE% echo kind: Pod
+>>%FILE% echo metadata:
+>>%FILE% echo   labels:
+>>%FILE% echo     app: redis
+>>%FILE% echo   name: redis
+>>%FILE% echo spec:
+>>%FILE% echo   containers:
+>>%FILE% echo   - name: redis
+>>%FILE% echo     image: redis:5.0.3
+>>%FILE% echo     ports:
+>>%FILE% echo     - name: redis
+>>%FILE% echo       containerPort: 6379
+>>%FILE% echo       protocol: TCP
+kubectl create -f redis.yml
+```
+
 Finally, to expose the service, you need to run the following command to create a Service Type Load Balancer:
+
+For Linux & MacOS:
 
 ```
 cat <<EOF | kubectl create -f -
@@ -301,9 +440,36 @@ spec:
 EOF
 ```
 
+For Windows:
+
+```
+set FILE=edgelb-redis.yml
+>%FILE% echo apiVersion: v1
+>>%FILE% echo kind: Service
+>>%FILE% echo metadata:
+>>%FILE% echo   annotations:
+>>%FILE% echo     kubernetes.dcos.io/edgelb-pool-name: "dklb"
+>>%FILE% echo     kubernetes.dcos.io/edgelb-pool-size: "2"
+>>%FILE% echo     kubernetes.dcos.io/edgelb-pool-portmap.6379: "80%cluster%"
+>>%FILE% echo   labels:
+>>%FILE% echo     app: redis
+>>%FILE% echo   name: redis
+>>%FILE% echo spec:
+>>%FILE% echo   type: LoadBalancer
+>>%FILE% echo   selector:
+>>%FILE% echo     app: redis
+>>%FILE% echo   ports:
+>>%FILE% echo   - protocol: TCP
+>>%FILE% echo     port: 6379
+>>%FILE% echo     targetPort: 6379
+kubectl create -f edgelb-redis.yml
+```
+
 A dklb EdgeLB pool is automatically created on DC/OS:
 
-You can validate that you can access the redis POD from your laptop using telnet:
+You can validate that you can access the redis Pod from your laptop using telnet:
+
+For Linux & MacOS:
 
 ```
 telnet ${PUBLICIP} 80${CLUSTER}
@@ -312,7 +478,24 @@ Connected to ec2-34-227-199-197.compute-1.amazonaws.com.
 Escape character is '^]'.
 ```
 
-## 5. Expose a Kubernetes Application using an Ingress (L7)
+For Windows:
+
+```
+telnet %PUBLICIP% 80%CLUSTER%
+Trying 34.227.199.197...
+Connected to ec2-34-227-199-197.compute-1.amazonaws.com.
+Escape character is '^]'.
+```
+
+If telnet is not enabled on your system, run Command Prompt as an administrator (Right click on the Command Prompt icon and select “Run as administrator”).
+
+Then, run the following command and wait.
+
+```
+dism /online /Enable-Feature /FeatureName:TelnetClient
+```
+
+## <a name="exposel7"></a>5. Expose a Kubernetes Application using an Ingress (L7)
 
 Update the PUBLICIP environment variable to use the Public IP of one of the DC/OS public node. It's needed because there is a limited number of listeners we can set on the AWS Load Balancer we use in front of the DC/OS public nodes.
 
@@ -321,8 +504,8 @@ This feature leverage the DC/OS EdgeLB and the dklb service that has been deploy
 You can now deploy 2 web application Pods on your Kubernetes cluster running the following command:
 
 ```
-kubectl run --restart=Never --image hashicorp/http-echo --labels app=http-echo-1,owner=dklb --port 80 http-echo-1 -- -listen=:80 --text='Hello from http-echo-1!'
-kubectl run --restart=Never --image hashicorp/http-echo --labels app=http-echo-2,owner=dklb --port 80 http-echo-2 -- -listen=:80 --text='Hello from http-echo-2!'
+kubectl run --restart=Never --image hashicorp/http-echo --labels app=http-echo-1,owner=dklb --port 80 http-echo-1 -- -listen=:80 --text="Hello from http-echo-1"
+kubectl run --restart=Never --image hashicorp/http-echo --labels app=http-echo-2,owner=dklb --port 80 http-echo-2 -- -listen=:80 --text="Hello from http-echo-2"
 ```
 
 Then, expose the Pods with a Service Type NodePort using the following commands:
@@ -333,6 +516,8 @@ kubectl expose pod http-echo-2 --port 80 --target-port 80 --type NodePort --name
 ```
 
 Finally create the Ingress to expose the application to the ourside world using the following command:
+
+For Linux & MacOS:
 
 ```
 cat <<EOF | kubectl create -f -
@@ -364,16 +549,59 @@ spec:
 EOF
 ```
 
+For Windows:
+
+```
+set FILE=ingress.yml
+>%FILE% echo apiVersion: extensions/v1beta1
+>>%FILE% echo kind: Ingress
+>>%FILE% echo metadata:
+>>%FILE% echo   annotations:
+>>%FILE% echo     kubernetes.io/ingress.class: edgelb
+>>%FILE% echo     kubernetes.dcos.io/edgelb-pool-name: "dklb"
+>>%FILE% echo     kubernetes.dcos.io/edgelb-pool-size: "2"
+>>%FILE% echo     kubernetes.dcos.io/edgelb-pool-port: "90%CLUSTER%"
+>>%FILE% echo   labels:
+>>%FILE% echo     owner: dklb
+>>%FILE% echo   name: dklb-echo
+>>%FILE% echo spec:
+>>%FILE% echo   rules:
+>>%FILE% echo   - host: "http-echo-%CLUSTER%-1.com"
+>>%FILE% echo     http:
+>>%FILE% echo       paths:
+>>%FILE% echo       - backend:
+>>%FILE% echo           serviceName: http-echo-1
+>>%FILE% echo           servicePort: 80
+>>%FILE% echo   - host: "http-echo-%CLUSTER%-2.com"
+>>%FILE% echo     http:
+>>%FILE% echo       paths:
+>>%FILE% echo       - backend:
+>>%FILE% echo           serviceName: http-echo-2
+>>%FILE% echo           servicePort: 80
+kubectl create -f ingress.yml
+```
+
 The dklb EdgeLB pool is automatically updated on DC/OS:
 
 You can validate that you can access the web application PODs from your laptop using the following commands:
+
+For Linux & MacOS:
 
 ```
 curl -H "Host: http-echo-${CLUSTER}-1.com" http://${PUBLICIP}:90${CLUSTER}
 curl -H "Host: http-echo-${CLUSTER}-2.com" http://${PUBLICIP}:90${CLUSTER}
 ```
 
-## 6. Leverage persistent storage using Portworx
+For Windows: (only if your Windows version contains curl)
+
+```
+curl -H "Host: http-echo-%CLUSTER%-1.com" http://%PUBLICIP%:90%CLUSTER%
+curl -H "Host: http-echo-%CLUSTER%-2.com" http://%PUBLICIP%:90%CLUSTER%
+```
+
+If you don't have curl, you can add the corresponding entries in your `hosts` file and access the web pages using your web browser.
+
+## <a name="portworx"></a>6. Leverage persistent storage using Portworx
 
 Portworx is a Software Defined Software that can use the local storage of the DC/OS nodes to provide High Available persistent storage to both Kubernetes pods and DC/OS services.
 
@@ -384,6 +612,8 @@ kubectl apply -f "https://install.portworx.com/2.0?kbver=1.13.3&b=true&dcos=true
 ```
 
 Create the Kubernetes StorageClass using the following command:
+
+For Linux & MacOS:
 
 ```
 cat <<EOF | kubectl create -f -
@@ -397,15 +627,31 @@ parameters:
 EOF
 ```
 
+For Windows:
+
+```
+set FILE=portworx.yml
+>%FILE% echo kind: StorageClass
+>>%FILE% echo apiVersion: storage.k8s.io/v1beta1
+>>%FILE% echo metadata:
+>>%FILE% echo    name: portworx-sc
+>>%FILE% echo provisioner: kubernetes.io/portworx-volume
+>>%FILE% echo parameters:
+>>%FILE% echo   repl: "2"
+kubectl create -f portworx.yml
+```
+
 It will create volumes on Portworx with 2 replicas.
 
 Run the following command to define this StorageClass as the default Storage Class in your Kubernetes cluster:
 
 ```
-kubectl patch storageclass portworx-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+kubectl patch storageclass portworx-sc -p "{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}"
 ```
 
 Create the Kubernetes PersistentVolumeClaim using the following command:
+
+For Linux & MacOS:
 
 ```
 cat <<EOF | kubectl create -f -
@@ -422,6 +668,25 @@ spec:
     requests:
       storage: 1Gi
 EOF
+```
+
+For Windows:
+
+```
+set FILE=portworx-pvc.yml
+>%FILE% echo kind: PersistentVolumeClaim
+>>%FILE% echo apiVersion: v1
+>>%FILE% echo metadata:
+>>%FILE% echo   name: pvc001
+>>%FILE% echo   annotations:
+>>%FILE% echo     volume.beta.kubernetes.io/storage-class: portworx-sc
+>>%FILE% echo spec:
+>>%FILE% echo   accessModes:
+>>%FILE% echo     - ReadWriteOnce
+>>%FILE% echo   resources:
+>>%FILE% echo     requests:
+>>%FILE% echo       storage: 1Gi
+kubectl create -f portworx-pvc.yml
 ```
 
 Check the status of the PersistentVolumeClaim using the following command:
@@ -451,6 +716,8 @@ Mounted By:  <none>
 
 Create a Kubernetes Pod that will use this PersistentVolumeClaim using the following command:
 
+For Linux & MacOS:
+
 ```
 cat <<EOF | kubectl create -f -
 apiVersion: v1
@@ -471,6 +738,30 @@ spec:
     persistentVolumeClaim:
       claimName: pvc001
 EOF
+```
+
+For Windows:
+
+```
+set FILE=test-container.yml
+>%FILE% echo apiVersion: v1
+>>%FILE% echo kind: Pod
+>>%FILE% echo metadata:
+>>%FILE% echo   name: pvpod
+>>%FILE% echo spec:
+>>%FILE% echo   containers:
+>>%FILE% echo   - name: test-container
+>>%FILE% echo     image: alpine:latest
+>>%FILE% echo     command: [ "/bin/sh" ]
+>>%FILE% echo     args: [ "-c", "while true; do sleep 60;done" ]
+>>%FILE% echo     volumeMounts:
+>>%FILE% echo     - name: test-volume
+>>%FILE% echo       mountPath: /test-portworx-volume
+>>%FILE% echo   volumes:
+>>%FILE% echo   - name: test-volume
+>>%FILE% echo     persistentVolumeClaim:
+>>%FILE% echo       claimName: pvc001
+kubectl create -f test-container.yml
 ```
 
 Create a file in the Volume using the following commands:
@@ -487,6 +778,8 @@ kubectl delete pod pvpod
 
 Create a Kubernetes Pod that will use the same PersistentVolumeClaim using the following command:
 
+For Linux & MacOS:
+
 ```
 cat <<EOF | kubectl create -f -
 apiVersion: v1
@@ -509,13 +802,38 @@ spec:
 EOF
 ```
 
+For Windows:
+
+```
+set FILE=test-container2.yml
+>%FILE% echo apiVersion: v1
+>>%FILE% echo kind: Pod
+>>%FILE% echo metadata:
+>>%FILE% echo   name: pvpod
+>>%FILE% echo spec:
+>>%FILE% echo   containers:
+>>%FILE% echo   - name: test-container
+>>%FILE% echo     image: alpine:latest
+>>%FILE% echo     command: [ "/bin/sh" ]
+>>%FILE% echo     args: [ "-c", "while true; do sleep 60;done" ]
+>>%FILE% echo     volumeMounts:
+>>%FILE% echo     - name: test-volume
+>>%FILE% echo       mountPath: /test-portworx-volume
+>>%FILE% echo   volumes:
+>>%FILE% echo   - name: test-volume
+>>%FILE% echo     persistentVolumeClaim:
+>>%FILE% echo       claimName: pvc001
+kubectl create -f test-container2.yml
+```
+
+
 Validate that the file created in the previous Pod is still available:
 
 ```
 kubectl exec -i pvpod cat /test-portworx-volume/test
 ```
 
-## 7. Leverage persistent storage using CSI
+## <a name="csi"></a>7. Leverage persistent storage using CSI
 
 Unzip the archive containing the CSI driver for AWS:
 
@@ -530,6 +848,8 @@ kubectl apply -f csi-driver-deployments-master/aws-ebs/kubernetes/latest/
 ```
 
 Create the Kubernetes StorageClass using the following command:
+
+For Linux & MacOS:
 
 ```
 cat <<EOF | kubectl create -f -
@@ -548,9 +868,30 @@ parameters:
 EOF
 ```
 
+For Windows:
+
+```
+set FILE=storageclass.yml
+>%FILE% echo kind: StorageClass
+>>%FILE% echo apiVersion: storage.k8s.io/v1
+>>%FILE% echo metadata:
+>>%FILE% echo   name: ebs-gp2
+>>%FILE% echo   annotations:
+>>%FILE% echo     storageclass.kubernetes.io/is-default-class: "true"
+>>%FILE% echo provisioner: ebs.csi.aws.com
+>>%FILE% echo volumeBindingMode: WaitForFirstConsumer
+>>%FILE% echo parameters:
+>>%FILE% echo   type: gp2
+>>%FILE% echo   fsType: ext4
+>>%FILE% echo   encrypted: "false"
+kubectl create -f storageclass.yml
+```
+
 This time we define the Storage Class as the default one while we create it.
 
 Create the Kubernetes PersistentVolumeClaim using the following command:
+
+For Linux & MacOS:
 
 ```
 cat <<EOF | kubectl create -f -
@@ -568,7 +909,27 @@ spec:
 EOF
 ```
 
+For Windows:
+
+```
+set FILE=pvc.yml
+>%FILE% echo apiVersion: v1
+>>%FILE% echo kind: PersistentVolumeClaim
+>>%FILE% echo metadata:
+>>%FILE% echo   name: dynamic
+>>%FILE% echo spec:
+>>%FILE% echo   accessModes:
+>>%FILE% echo     - ReadWriteOnce
+>>%FILE% echo   storageClassName: ebs-gp2
+>>%FILE% echo   resources:
+>>%FILE% echo     requests:
+>>%FILE% echo       storage: 1Gi
+kubectl create -f pvc.yml
+```
+
 Create a Kubernetes Deployment that will use this PersistentVolumeClaim using the following command:
+
+For Linux & MacOS:
 
 ```
 cat <<EOF | kubectl create -f -
@@ -603,29 +964,88 @@ spec:
 EOF
 ```
 
-Check the content of the file /data/out.txt and note the first timestamp:
+For Windows:
+
+```
+set FILE=deployment.yml
+>%FILE% echo apiVersion: apps/v1
+>>%FILE% echo kind: Deployment
+>>%FILE% echo metadata:
+>>%FILE% echo   name: ebs-dynamic-app
+>>%FILE% echo   labels:
+>>%FILE% echo     app: ebs-dynamic-app
+>>%FILE% echo spec:
+>>%FILE% echo   replicas: 1
+>>%FILE% echo   selector:
+>>%FILE% echo     matchLabels:
+>>%FILE% echo       app: ebs-dynamic-app
+>>%FILE% echo   template:
+>>%FILE% echo     metadata:
+>>%FILE% echo       labels:
+>>%FILE% echo         app: ebs-dynamic-app
+>>%FILE% echo     spec:
+>>%FILE% echo       containers:
+>>%FILE% echo       - name: ebs-dynamic-app
+>>%FILE% echo         image: centos:7
+>>%FILE% echo         command: ["/bin/sh"]
+>>%FILE% echo         args: ["-c", "while true; do echo $(date -u) >> /data/out.txt; sleep 5; done"]
+>>%FILE% echo         volumeMounts:
+>>%FILE% echo         - name: persistent-storage
+>>%FILE% echo           mountPath: /data
+>>%FILE% echo       volumes:
+>>%FILE% echo       - name: persistent-storage
+>>%FILE% echo         persistentVolumeClaim:
+>>%FILE% echo           claimName: dynamic
+kubectl create -f deployment.yml
+```
+
+Check the content of the file `/data/out.txt` and note the first timestamp:
+
+For Linux & MacOS:
 
 ```
 pod=$(kubectl get pods | grep ebs-dynamic-app | awk '{ print $1 }')
 kubectl exec -i $pod cat /data/out.txt
 ```
 
+For Windows:
+
+```
+@powershell "$pod = (.\kubectl get pods | findstr ebs-dynamic-app).split(\" \",3)[0]; .\kubectl exec -i $pod cat /data/out.txt"
+```
+
 Delete the Pod using the following command:
+
+For Linux & MacOS:
 
 ```
 kubectl delete pod $pod
 ```
 
+For Windows:
+
+```
+@powershell "$pod = (.\kubectl get pods | findstr ebs-dynamic-app).split(\" \",3)[0]; .\kubectl delete pod $pod
+```
+
 The Deployment will recreate the pod automatically.
 
-Check the content of the file /data/out.txt and verify that the first timestamp is the same as the one noted previously:
+Check the content of the file `/data/out.txt` and verify that the first timestamp is the same as the one noted previously:
+
+For Linux & MacOS:
 
 ```
 pod=$(kubectl get pods | grep ebs-dynamic-app | awk '{ print $1 }')
 kubectl exec -i $pod cat /data/out.txt
 ```
 
-## 8. Configure Helm
+For Windows:
+
+```
+@powershell "$pod = (.\kubectl get pods | findstr ebs-dynamic-app).split(\" \",3)[0]; .\kubectl exec -i $pod cat /data/out.txt"
+```
+
+## <a name="helm"></a>8. Configure Helm
 
 Helm is a package manager for Kubernetes. Helm Charts helps you define, install, and upgrade even the most complex Kubernetes application.
 
@@ -636,6 +1056,8 @@ Intall Helm on your laptop using the instructions available at the URL below:
 Tiller is the in-cluster component of Helm. It interacts directly with the Kubernetes API server to install, upgrade, query, and remove Kubernetes resources. It also stores the objects that represent releases.
 
 Run the following command to create a Kubernetes ServiceAccount for the Helm Tiller:
+
+For Linux & MacOS:
 
 ```
 cat <<EOF | kubectl create -f -
@@ -660,19 +1082,48 @@ subjects:
 EOF
 ```
 
+For Windows:
+
+```
+set FILE=tiller.yml
+>%FILE% echo apiVersion: v1
+>>%FILE% echo kind: ServiceAccount
+>>%FILE% echo metadata:
+>>%FILE% echo   name: tiller
+>>%FILE% echo   namespace: kube-system
+>>%FILE% echo ---
+>>%FILE% echo apiVersion: rbac.authorization.k8s.io/v1beta1
+>>%FILE% echo kind: ClusterRoleBinding
+>>%FILE% echo metadata:
+>>%FILE% echo   name: tiller
+>>%FILE% echo roleRef:
+>>%FILE% echo   apiGroup: rbac.authorization.k8s.io
+>>%FILE% echo   kind: ClusterRole
+>>%FILE% echo   name: cluster-admin
+>>%FILE% echo subjects:
+>>%FILE% echo - kind: ServiceAccount
+>>%FILE% echo   name: tiller
+>>%FILE% echo   namespace: kube-system
+kubectl create -f tiller.yml
+```
+
 Run the following command to install Tiller into your Kubernetes cluster:
 
 ```
 helm init --service-account tiller
 ```
 
-## 9. Deploy Istio using Helm
+## <a name="deploy-istio"></a>9. Deploy Istio using Helm
+
+###PLEASE NOTE THAT THIS GUIDE CURRENTLY DOES NOT PROVIDE INSTRUCTIONS TO DEPLOY ISTIO ON WINDOWS WORKSTATIONS###
 
 Cloud platforms provide a wealth of benefits for the organizations that use them. There’s no denying, however, that adopting the cloud can put strains on DevOps teams. Developers must use microservices to architect for portability, meanwhile operators are managing extremely large hybrid and multi-cloud deployments. Istio lets you connect, secure, control, and observe services.
 
 At a high level, Istio helps reduce the complexity of these deployments, and eases the strain on your development teams. It is a completely open source service mesh that layers transparently onto existing distributed applications. It is also a platform, including APIs that let it integrate into any logging platform, or telemetry or policy system. Istio’s diverse feature set lets you successfully, and efficiently, run a distributed microservice architecture, and provides a uniform way to secure, connect, and monitor microservices.
 
-Download the latest release of Istio usign the followig command:
+Download the latest release of Istio using the followig command:
+
+For Linux & MacOS:
 
 ```
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.6 sh -
@@ -696,7 +1147,7 @@ helm install install/kubernetes/helm/istio --name istio --namespace istio-system
   --set gateways.istio-ingressgateway.ports[0].nodePort=30000
 ```
 
-## 10. Deploy an application on Istio
+## <a name="deploy-app"></a>10. Deploy an application on Istio
 
 This example deploys a sample application composed of four separate microservices used to demonstrate various Istio features. The application displays information about a book, similar to a single catalog entry of an online book store. Displayed on the page is a description of the book, book details (ISBN, number of pages, and so on), and a few book reviews.
 
