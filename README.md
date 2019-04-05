@@ -19,6 +19,8 @@ During the labs, replace XX by the number assigned by the instructor (starting w
 
 ## Pre requisites
 
+### For the instructor
+
 You need to have access to a DC/OS Enteprise Edition cluster deployed in strict mode with 1.12.1 or later.
 
 The DC/OS Kubernetes MKE package must be installed in the cluster. This package is used by DC/OS to manage multiple DC/OS clusters on the same DC/OS cluster.
@@ -55,6 +57,14 @@ For CSI, you need to attach the following inline IAM policy to your AWS instance
 }
 ```
 
+The beginning of the `install.sh` file can be used to deploy all the pre requisites.
+
+### For the students
+
+You need either a Linux, MacOS or Windows laptop with admin privileges.
+
+>For Windows, if you don't have admin privileges, you can use the [Google Cloud Shell](https://console.cloud.google.com/cloudshell) and follow the instructions for Linux & MacOS.
+
 Run the following command to export the environment variables needed during the labs:
 
 For Linux & MacOS:
@@ -90,7 +100,7 @@ Install the kubectl CLI using the instructions available at the URL below:
 
 [https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl)
 
-Add the following line to your /etc/hosts (or c:\Windows\System32\Drivers\etc\hosts) file:
+Add the following line to your `/etc/hosts` (or `c:\Windows\System32\Drivers\etc\hosts`) file:
 
 ```
 <PUBLICIP variable> training.prod.k8s.cluster<CLUSTER variable>.mesos.lab
@@ -98,7 +108,7 @@ Add the following line to your /etc/hosts (or c:\Windows\System32\Drivers\etc\ho
 
 ## <a name="deploy"></a>1. Deploy a Kubernetes cluster
 
-Create a file called options-kubernetes-cluster${CLUSTER}.json using the following commands:
+Create a file called `options-kubernetes-cluster${CLUSTER}.json` using the following commands:
 
 For Linux & MacOS:
 
@@ -147,7 +157,7 @@ It will allow you to deploy a Kubernetes cluster with RBAC enabled, HA disabled 
 
 For Linux & MacOS:
 
-Create a file called deploy-kubernetes-cluster.sh with the following content:
+Create a file called `deploy-kubernetes-cluster.sh` with the following content:
 
 ```
 clusterpath=${APPNAME}/prod/k8s/cluster${1}
@@ -185,7 +195,7 @@ dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${1}.js
 
 For Windows:
 
-Create a file called deploy-kubernetes-cluster.bat with the following content:
+Create a file called `deploy-kubernetes-cluster.bat` with the following content:
 
 ```
 set clusterpath=%APPNAME%/prod/k8s/cluster%1%
@@ -295,9 +305,19 @@ Login using the config file.
 
 ![Kubernetes dashboard](images/kubernetes-dashboard.png)
 
+>If you are using the Google Cloud Shell, click on icon with the 3 dots on the top right corner and click on `Download file`.
+
+>Indicate the path of the config file (`/home/<your user>/config`) and download it.
+
+>Then, click on the `Web preview` icon on the top right corner and change the port to `8001`.
+
+>Finally, click on the `Web preview` icon again and select `Preview on port 8001`.
+
+>It will open a new tab. Keep the hostname and append `/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/` to it.
+
 ## <a name="scale"></a>2. Scale your Kubernetes cluster
 
-Edit the options-kubernetes-clusterXX.json file to set the private_node_count to 3.
+Edit the `options-kubernetes-clusterXX.json` file to set the private_node_count to 3.
 
 Run the following command to scale your Kubernetes cluster:
 
