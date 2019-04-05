@@ -608,7 +608,7 @@ Portworx is a Software Defined Software that can use the local storage of the DC
 To be able to use Portworx persistent storage on your Kubernetes cluster, you need to deploy it in your Kubernetes cluster using the following command:
 
 ```
-kubectl apply -f "https://install.portworx.com/2.0?kbver=1.13.3&b=true&dcos=true&stork=true"
+kubectl apply -f "https://install.portworx.com/2.0?kbver=1.13.5&b=true&dcos=true&stork=true"
 ```
 
 Create the Kubernetes StorageClass using the following command:
@@ -1136,7 +1136,7 @@ You can also download the releases for other Operating Systems using the URL bel
 Run the following commands to go to the Istio directory and to install Istio using Helm:
 
 ```
-cd istio-1.0.5
+cd istio-1.0.6
 export PATH=$PWD/bin:$PATH
 helm install install/kubernetes/helm/istio --name istio --namespace istio-system \
   --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb \

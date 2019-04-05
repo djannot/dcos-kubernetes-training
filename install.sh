@@ -220,7 +220,7 @@ done
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   version=$(kubectl --kubeconfig=./config.cluster${i} version --short | awk -Fv '/Server Version: / {print $3}')
-  kubectl --kubeconfig=./config.cluster${i} apply -f "https://install.portworx.com/2.0?kbver=1.13.3&b=true&dcos=true&stork=true"
+  kubectl --kubeconfig=./config.cluster${i} apply -f "https://install.portworx.com/2.0?kbver=1.13.5&b=true&dcos=true&stork=true"
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
