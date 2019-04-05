@@ -15,7 +15,7 @@ During this training, you'll learn how to use the main capabilities of Kubernete
 - Deploy Istio using Helm
 - Deploy an application on Istio
 
-## [Instructors / Platform Operators](https://github.com/ably77/dcos-kubernetes-training/tree/master/instructor)
+## [Instructors / Platform Operators](https://github.com/ably77/dcos-kubernetes-training/tree/master/instructor.md)
 Follow the link above to access the Instructors README to set up the lab cluster
 
 ## [Student / Development or DevOps teams](https://github.com/ably77/dcos-kubernetes-training/tree/master/labs)
