@@ -1,33 +1,52 @@
 # Pre requisites
 
+## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=18.206.144.206
-export CLUSTER=djannot
-export REGION=us-east-1
-clusters=3
+export PUBLICIP=34.220.163.29
+export CLUSTER=alexly-cluster
+export REGION=us-west-2
+clusters=1
+
+#### SETUP MASTER URL VARIABLE
+
+# NOTE: elb url is not used in this script (yet) TODO
+if [[ $1 == "" ]]
+then
+        echo
+        echo " A master node's URL was not entered. Aborting."
+        echo
+        exit 1
+fi
+
+# For the master change http to https so kubectl setup doesn't break
+MASTER_URL=$(echo $1 | sed 's/http/https/')
+
+#### SETUP CLI
+
+./scripts/setup_cli.sh $MASTER_URL
 
 loadbalancer=ext-$CLUSTER
 eval $(maws login 110465657741_Mesosphere-PowerUser)
 # The group ID of the AWS Security Group of the DC/OS public nodes
 group=$(aws --region=$REGION ec2 describe-instances |  jq --raw-output ".Reservations[].Instances[] | select((.Tags | length) > 0) | select(.Tags[].Value | test(\"${CLUSTER}-publicagent\")) | select(.State.Name | test(\"running\")) | .SecurityGroups[] | [.GroupName, .GroupId] | \"\(.[0]) \(.[1])\"" | grep public-agents-lb-firewall | awk '{ print $2 }' | sort -u)
 
-./create-and-attach-volumes.sh
-./create-csi-iam-policy.sh
-./update-aws-network-configuration.sh ${clusters} ${loadbalancer} ${group}
+./scripts/create-and-attach-volumes.sh
+./scripts/create-csi-iam-policy.sh
+./scripts/update-aws-network-configuration.sh ${clusters} ${loadbalancer} ${group}
 
 dcos package install --yes --cli dcos-enterprise-cli
 
 nodes=$(dcos node --json | jq --raw-output ".[] | select((.type | test(\"agent\")) and (.attributes.public_ip == null)) | .id" | wc -l | awk '{ print $1 }')
-sed "s/NODES/${nodes}/g" options-portworx.json.template > options-portworx.json
+sed "s/NODES/${nodes}/g" scripts/options-portworx.json.template > scripts/options-portworx.json
 
-./deploy-portworx.sh
+./scripts/deploy-portworx.sh
 
-./deploy-kubernetes-mke.sh
-./check-kubernetes-mke-status.sh
+./scripts/deploy-kubernetes-mke.sh
+./scripts/check-kubernetes-mke-status.sh
 
 ./create-pool-edgelb-all.sh ${clusters}
-./deploy-edgelb.sh
-./check-app-status.sh infra/network/dcos-edgelb/pools/all
+./scripts/deploy-edgelb.sh
+./scripts/check-app-status.sh infra/network/dcos-edgelb/pools/all
 
 sed "/mesos.lab/d" /etc/hosts > ./hosts
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
@@ -38,12 +57,12 @@ sudo mv hosts /etc/hosts
 # 1. Deploy a Kubernetes cluster
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  sed "s/TOBEREPLACED/${i}/g" options-kubernetes-cluster.json.template > options-kubernetes-cluster${i}.json
-  ./deploy-kubernetes-cluster.sh $i
+  sed "s/TOBEREPLACED/${i}/g" scripts/options-kubernetes-cluster.json.template > scripts/options-kubernetes-cluster${i}.json
+  ./scripts/deploy-kubernetes-cluster.sh $i
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  ./check-kubernetes-cluster-status.sh ${APPNAME}/prod/k8s/cluster${i}
+  ./scripts/check-kubernetes-cluster-status.sh ${APPNAME}/prod/k8s/cluster${i}
 done
 
 if [ -f ~/.kube/config ]; then
@@ -62,8 +81,8 @@ fi
 # 2. Scale your Kubernetes cluster
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  sed "s/TOBEREPLACED/${i}/g" options-kubernetes-update-cluster.json.template > options-kubernetes-update-cluster${i}.json
-  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --options=options-kubernetes-update-cluster${i}.json --yes
+  sed "s/TOBEREPLACED/${i}/g" scripts/options-kubernetes-update-cluster.json.template > scripts/options-kubernetes-update-cluster${i}.json
+  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --options=scripts/options-kubernetes-update-cluster${i}.json --yes
 done
 
 # 3. Upgrade your Kubernetes cluster
@@ -80,14 +99,14 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: djannot@gmail.com
+  name: aly@mesosphere.com
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
   name: cluster-admin
 subjects:
 - kind: User
-  name: djannot@gmail.com
+  name: aly@mesosphere.com
   namespace: kube-system
 EOF
 done
@@ -100,8 +119,8 @@ kubectl --kubeconfig=./config.cluster${i} --token=$(dcos config show core.dcos_a
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
-  kubectl --kubeconfig=./config.cluster${i} create -f dklb-prereqs.yaml
-  kubectl --kubeconfig=./config.cluster${i} create -f dklb-deployment.yaml
+  kubectl --kubeconfig=./config.cluster${i} create -f scripts/dklb-prereqs.yaml
+  kubectl --kubeconfig=./config.cluster${i} create -f scripts/dklb-deployment.yaml
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
@@ -131,7 +150,7 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    kubernetes.dcos.io/edgelb-pool-name: "dklb"
+    kubernetes.dcos.io/edgelb-pool-name: "dklb${i}"
     kubernetes.dcos.io/edgelb-pool-size: "2"
     kubernetes.dcos.io/edgelb-pool-portmap.6379: "80${i}"
   labels:
@@ -147,6 +166,8 @@ spec:
     targetPort: 6379
 EOF
 done
+
+sleep 30
 
 # Sample Configurations
 
@@ -184,11 +205,11 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: edgelb
-    kubernetes.dcos.io/edgelb-pool-name: "dklb"
+    kubernetes.dcos.io/edgelb-pool-name: "dklb${i}"
     kubernetes.dcos.io/edgelb-pool-size: "2"
     kubernetes.dcos.io/edgelb-pool-port: "90${i}"
   labels:
-    owner: dklb
+    owner: dklb${i}
   name: dklb-echo
 spec:
   rules:
@@ -207,6 +228,8 @@ spec:
 EOF
 done
 
+sleep 30
+
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   curl -H "Host: http-echo-${i}-1.com" http://${PUBLICIP}:90${i}
@@ -215,12 +238,12 @@ done
 
 # 6. Leverage persistent storage using Portworx
 
-./check-status-with-name.sh portworx infra/storage/portworx
+./scripts/check-status-with-name.sh portworx infra/storage/portworx
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   version=$(kubectl --kubeconfig=./config.cluster${i} version --short | awk -Fv '/Server Version: / {print $3}')
-  kubectl --kubeconfig=./config.cluster${i} apply -f "https://install.portworx.com/2.0?kbver=1.13.5&b=true&dcos=true&stork=true"
+  kubectl --kubeconfig=./config.cluster${i} apply -f "https://install.portworx.com/2.0?kbver=1.13.3&b=true&dcos=true&stork=true"
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
@@ -259,6 +282,9 @@ spec:
 EOF
 done
 
+## Sleeping 60 seconds to let the pvc spin up
+sleep 60
+
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
@@ -284,8 +310,11 @@ done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
-  kubectl --kubeconfig=./config.cluster${i} get pods
+  kubectl get pods --kubeconfig=./config.cluster${i}
 done
+
+## Sleeping 20 seconds to let the pod spin up
+sleep 20
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -320,6 +349,9 @@ spec:
 EOF
 done
 
+## Sleeping 20 seconds to let the pod spin up
+sleep 20
+
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   kubectl --kubeconfig=./config.cluster${i} exec pvpod cat /test-portworx-volume/test;
@@ -327,10 +359,15 @@ done
 
 # 7. Leverage persistent storage using CSI
 
+unzip scripts/csi-driver-deployments-master.zip
+
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   kubectl --kubeconfig=./config.cluster${i} apply -f csi-driver-deployments-master/aws-ebs/kubernetes/latest/
 done
+
+## Sleeping 30 seconds to let the drivers spin up
+sleep 30
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -401,6 +438,9 @@ spec:
 EOF
 done
 
+## Sleeping 120 seconds to let the pod spin up
+sleep 120
+
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   kubectl --kubeconfig=./config.cluster${i} get pods
@@ -417,6 +457,9 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   pod=$(kubectl --kubeconfig=./config.cluster${i} get pods | grep ebs-dynamic-app | awk '{ print $1 }')
   kubectl --kubeconfig=./config.cluster${i} delete pod $pod
 done
+
+## Sleeping 60 seconds to let the pod spin up
+sleep 60
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -450,6 +493,9 @@ subjects:
 EOF
 done
 
+## Sleeping 150 seconds to let the tiller spin up
+sleep 150
+
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   helm --kubeconfig=./config.cluster${i} init --service-account tiller
@@ -457,12 +503,12 @@ done
 
 # 9. Deploy Istio using Helm
 
-curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.6 sh -
+#curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.6 sh -
 
 export PATH=$PWD/istio-1.0.6/bin:$PATH
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
-  helm --kubeconfig=./config.cluster${i} install istio-1.0.5/install/kubernetes/helm/istio --name istio --namespace istio-system \
+  helm --kubeconfig=./config.cluster${i} install istio-1.0.6/install/kubernetes/helm/istio --name istio --namespace istio-system \
   --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb \
   --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-size"=\"2\" \
   --set gateways.istio-ingressgateway.ports[0].port=100${i} \
@@ -475,16 +521,19 @@ done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
-  kubectl --kubeconfig=./config.cluster${i} apply -f <(istioctl --kubeconfig=./config.cluster${i} kube-inject -f istio-1.0.5/samples/bookinfo/platform/kube/bookinfo.yaml)
-  kubectl --kubeconfig=./config.cluster${i} apply -f istio-1.0.5/samples/bookinfo/networking/bookinfo-gateway.yaml
+  kubectl --kubeconfig=./config.cluster${i} apply -f <(istioctl --kubeconfig=./config.cluster${i} kube-inject -f istio-1.0.6/samples/bookinfo/platform/kube/bookinfo.yaml)
+  kubectl --kubeconfig=./config.cluster${i} apply -f istio-1.0.6/samples/bookinfo/networking/bookinfo-gateway.yaml
 done
+
+## Sleeping 30 seconds to let knative spin up
+sleep 30
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   curl -I http://${PUBLICIP}:100${i}/productpage
 done
 
-# 11. Deploy Knative (in progress)
+# 11. Deploy Knative
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -496,7 +545,10 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
      --filename https://raw.githubusercontent.com/knative/serving/v0.4.0/third_party/config/build/clusterrole.yaml
 done
 
-# 11. Deploy an application on Knative (in progress)
+## Sleeping 60 seconds to let knative spin up
+sleep 60
+
+# 11. Deploy an application on Knative
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -518,6 +570,9 @@ spec:
                 value: "Go Sample v1"
 EOF
 done
+
+## Sleeping 60 seconds to let the knative application spin up
+sleep 60
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"

@@ -1,0 +1,18 @@
+apiVersion: v1
+clusters:
+- cluster:
+    insecure-skip-tls-verify: true
+    server: https://training.prod.k8s.cluster02.mesos.lab:8443
+  name: training-prod-k8s-cluster02
+contexts:
+- context:
+    cluster: training-prod-k8s-cluster02
+    user: training-prod-k8s-cluster02
+  name: training-prod-k8s-cluster02
+current-context: training-prod-k8s-cluster02
+kind: Config
+preferences: {}
+users:
+- name: training-prod-k8s-cluster02
+  user:
+    token: eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkY29zLWt1YmVybmV0ZXMiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlY3JldC5uYW1lIjoiYm9vdHN0cmFwcGVyLXRva2VuLXBic2xyIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQubmFtZSI6ImJvb3RzdHJhcHBlciIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VydmljZS1hY2NvdW50LnVpZCI6IjA1OWM4OWYxLTU3YzctMTFlOS1iMzUwLTQyNjYyNmU1NTAyZSIsInN1YiI6InN5c3RlbTpzZXJ2aWNlYWNjb3VudDpkY29zLWt1YmVybmV0ZXM6Ym9vdHN0cmFwcGVyIn0.MZUn78qNy31TCS_yycF9ctutFlOiAyP_RM6P2iNNjcEDt0aVaK5RMeQj9I7sLIxxgUmjb_xYLD1N9lW0-bPQqPL8cHXnB8K66ZhIa0bd3Z0fp2c_p96oKZdaumAv-PDYtT66Eoi3UN4EIdbwDlIoR70wibcybywb3o-jMu5sxNKNDfZ4AGG5zst6UHyXlli1a225GWNNHsrKCHszBJ2vh3yoR-OrB29YEX6bg4fpPXSnKS72yg6a-ogIK3Ryet32YceCMCn7H0cVB7RNk4wbecBp1t_MTbr9hdfsiYgCnu8aDoMDLoSzw1CtFuT3srgvhzvSjxdM7hB-_jGVWNbA4A
