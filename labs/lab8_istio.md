@@ -11,7 +11,7 @@ For our labs today we will be using Istio 1.0.6 which already exists in the `stu
 
 Run the following commands to go to the Istio directory and to install Istio using Helm:
 ```
-export PATH=$PWD/bin:$PATH
+export PATH=$PWD/istio-1.0.6/bin:$PATH
 helm --kubeconfig=./config.cluster${CLUSTER} install istio-1.0.6/install/kubernetes/helm/istio --name istio --namespace istio-system \
   --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb${CLUSTER} \
   --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-size"=\"2\" \
