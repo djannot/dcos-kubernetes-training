@@ -457,7 +457,9 @@ done
 
 # 9. Deploy Istio using Helm
 
-export PATH=$PWD/istio-1.0.5/bin:$PATH
+curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.6 sh -
+
+export PATH=$PWD/istio-1.0.6/bin:$PATH
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   helm --kubeconfig=./config.cluster${i} install istio-1.0.5/install/kubernetes/helm/istio --name istio --namespace istio-system \
@@ -482,7 +484,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   curl -I http://${PUBLICIP}:100${i}/productpage
 done
 
-# 11. Deploy Knative
+# 11. Deploy Knative (in progress)
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -494,7 +496,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
      --filename https://raw.githubusercontent.com/knative/serving/v0.4.0/third_party/config/build/clusterrole.yaml
 done
 
-# 11. Deploy an application on Knative
+# 11. Deploy an application on Knative (in progress)
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
