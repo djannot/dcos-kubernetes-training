@@ -1,4 +1,4 @@
-eval $(maws login 110465657741_Mesosphere-PowerUser)
+eval $(maws login 398053451782_Mesosphere-PowerUser)
 name=$CLUSTER
 region=$REGION
 
