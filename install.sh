@@ -2,8 +2,8 @@
 
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=34.220.163.29
-export CLUSTER=alexly-cluster
+export PUBLICIP=54.149.137.143
+export CLUSTER=k8straining-clustertest
 export REGION=us-west-2
 clusters=1
 
