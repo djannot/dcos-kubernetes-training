@@ -82,7 +82,7 @@ set PUBLICIP=<IP provided by the instructor>
 set CLUSTER=<the number assigned by the instructor: 01, 02, ..>
 ```
 
-Log into the DC/OS Kubernetes cluster with the information provided by your instructor and download the DC/OS CLI.
+Log into the DC/OS cluster with the information provided by your instructor.
 
 On the top right corner, click on the name of the cluster and then on `Install CLI`.
 
