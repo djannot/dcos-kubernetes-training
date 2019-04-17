@@ -1,5 +1,11 @@
 # Lab 2: Scaling a Kubernetes Cluster
 
+### Objectives
+- Scale existing kubernetes cluster from 2 kubelet nodes to 3
+
+### Why is this Important?
+Often times we find that workloads can be intermittent in load. The ability to easily scale up and scale down resources allows operators the ability to dynamically scale workloads to meet expected demand.
+
 ## Edit your options.json
 Edit the options-kubernetes-cluster${CLUSTER}.json file to set the private_node_count to 3.
 ```
@@ -50,4 +56,4 @@ You can check that the new node is shown in the Kubernetes Dashboard:
 
 ## Finished with the Lab 2 - Scaling
 
-[Move to Lab 3 - Upgrading Kubernetes](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab3_upgrading.md)
+[Move to Lab 3 - Upgrading Kubernetes](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab3_upgrading.md)

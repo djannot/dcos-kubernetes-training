@@ -24,7 +24,7 @@ MASTER_URL=$(echo $1 | sed 's/http/https/')
 ./scripts/setup_cli.sh $MASTER_URL
 
 loadbalancer=ext-$CLUSTER
-eval $(maws login 110465657741_Mesosphere-PowerUser)
+eval $(maws login 398053451782_Mesosphere-PowerUser)
 # The group ID of the AWS Security Group of the DC/OS public nodes
 group=$(aws --region=$REGION ec2 describe-instances |  jq --raw-output ".Reservations[].Instances[] | select((.Tags | length) > 0) | select(.Tags[].Value | test(\"${CLUSTER}-publicagent\")) | select(.State.Name | test(\"running\")) | .SecurityGroups[] | [.GroupName, .GroupId] | \"\(.[0]) \(.[1])\"" | grep public-agents-lb-firewall | awk '{ print $2 }' | sort -u)
 

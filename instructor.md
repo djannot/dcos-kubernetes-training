@@ -10,6 +10,9 @@ rm -rf ~/.dcos/clusters
 sudo mv ~/.kube/config /tmp/kube-config
 ```
 
+## Set up MAWS
+In order to access the Mesosphere AWS account, it is required to set up MAWS
+
 ## Spin up a DC/OS Cluster using Terraform
 
 Example main.tf:
@@ -72,6 +75,11 @@ export PUBLICIP=34.209.125.234
 export CLUSTER=aly-testing
 export REGION=us-west-2
 clusters=1
+```
+
+Install the AWS CLI:
+```
+brew install awscli
 ```
 
 Run the automated install to get the DC/OS cluster set up with MKE and EdgeLB:

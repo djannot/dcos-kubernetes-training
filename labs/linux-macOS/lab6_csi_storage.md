@@ -1,5 +1,16 @@
 # Lab 6: Leverage persistent storage using CSI
+
+### Objectives
+- Deploy the AWS EBS CSI Driver on your existing kubernetes cluster
+- Create a kubernetes StorageClass to use the AWS CSI driver
+- Create a PersistentVolumeClaim (pvc) to use the AWS EBS CSI driver
+- Create a service that will use this PVC and dynamically provision an EBS volume
+- Validate persistence
+
+### Why is this Important?
 The goal of CSI is to establish a standardized mechanism for Container Orchestration Systems (COs) to expose arbitrary storage systems to their containerized workloads. The CSI specification emerged from cooperation between community members from various Container Orchestration Systems (COs)–including Kubernetes, Mesos, Docker, and Cloud Foundry.
+
+By creating an industry standard interface, the CSI initiative sets ground rules in order to minimize user confusion. By providing a pluggable standardized interface, the community will be able to adopt and maintain new CSI-enabled storage drivers to their kubernetes clusters as they mature. Choosing a solution that supports CSI integration will allow your business to adopt the latest and greatest storage solutions with ease.
 
 ## Set up CSI driver for AWS
 Unzip the archive containing the CSI driver for AWS:
@@ -127,4 +138,4 @@ kubectl --kubeconfig=./config.cluster${CLUSTER} exec -i $pod cat /data/out.txt
 
 ## Finished with the Lab 6 - CSI Storage
 
-[Move to Lab 7 - Configuring Helm](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab7_configure_helm.md)
+[Move to Lab 7 - Configuring Helm](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab7_configure_helm.md)

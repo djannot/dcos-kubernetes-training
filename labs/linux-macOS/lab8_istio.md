@@ -1,4 +1,11 @@
 # Lab 8: Deploy Istio using Helm and Deploy Applications using Istio
+
+### Objectives
+- Install Istio on your kubernetes cluster using Helm
+- Deploy and expose an application on Istio
+- Validate access to your application
+
+### Why is this Important?
 Cloud platforms provide a wealth of benefits for the organizations that use them. There’s no denying, however, that adopting the cloud can put strain on DevOps teams. Developers must use microservices to architect for portability, meanwhile operators are managing extremely large hybrid and multi-cloud deployments. Istio lets you connect, secure, control, and observe services.
 
 At a high level, Istio helps reduce the complexity of these deployments, and eases the strain on your development teams. It is a completely open source service mesh that layers transparently onto existing distributed applications. It is also a platform, including APIs that let it integrate into any logging platform, or telemetry or policy system. Istio’s diverse feature set lets you successfully, and efficiently, run a distributed microservice architecture, and provides a uniform way to secure, connect, and monitor microservices.
@@ -212,3 +219,5 @@ open http://${PUBLICIP}:100${CLUSTER}/productpage
 You can then follow the other steps described in the Istio documentation to understand the different Istio features:
 
 [https://istio.io/docs/examples/bookinfo/](https://istio.io/docs/examples/bookinfo/)
+
+# Congrats! We are now done with all of the labs!

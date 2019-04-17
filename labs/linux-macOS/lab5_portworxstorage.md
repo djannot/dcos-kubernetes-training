@@ -1,10 +1,21 @@
 # Lab 5: Leverage persistent storage using Portworx
-
 Portworx is a Software Defined Software that can use the local storage of the DC/OS nodes to provide High Available persistent storage to both Kubernetes pods and DC/OS services.
 
-To be able to use Portworx persistent storage on your Kubernetes cluster, you need to deploy it in your Kubernetes cluster using the following command:
+### Objectives
+- Use the Portworx Storage Service on DC/OS to leverage persistent storage using a kubernetes StorageClass
+- Create a PersistentVolumeClaim (pvc) to use volumes created in Portworx
+- Create a Pod service that will consume this pvc, write data to the persistent volume, and delete the Pod
+- Create a second Pod service that will consume the same pvc and validate that data persisted
+
+### Why is this Important?
+In recent years, containerization has become a popular way to bundle applications in a way that can be created and destroyed as often as needed. However, initially the containerization space did not support persistent storage, meaning that the data created within a container would disappear when the app finished its work and the container was destroyed. For many use-cases this is undesirable, and the industry has met the need by providing methods of retaining data created by storing them in persistent volumes. This allows for stateful applications such as databases to remain available even if a container goes down.
+
+Mesosphere provides multiple ways to achieving persistent storage for containerized applications. Portworx has been a partner of Mesosphere for many years and is a leading solution for container-based storage on the market. The Portworx solution is well integrated with the Mesos, DC/OS, and the Kubernetes community.
+
 
 ## Deploy Portworx Stork service on your Kubernetes cluster
+
+To be able to use Portworx persistent storage on your Kubernetes cluster, you need to deploy it in your Kubernetes cluster using the following command:
 ```
 kubectl --kubeconfig=./config.cluster${CLUSTER} apply -f "https://install.portworx.com/2.0?kbver=1.13.3&b=true&dcos=true&stork=true"
 ```
@@ -165,4 +176,4 @@ kubectl --kubeconfig=./config.cluster${CLUSTER} delete pod pvpod2
 
 ## Finished with the Lab 5 - Portworx Storage
 
-[Move to Lab 6 - CSI Storage](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab6_csi_storage.md)
+[Move to Lab 6 - CSI Storage](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab6_csi_storage.md)

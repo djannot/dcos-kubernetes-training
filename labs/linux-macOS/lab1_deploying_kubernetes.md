@@ -1,5 +1,12 @@
 # Lab 1: Deploy a Kubernetes cluster
 
+### Objectives
+- Create a DC/OS service account for kubernetes and assign permissions to deploy a cluster
+- Connect to the kubernetes cluster using kubectl and access the dashboard through a browser on your local machine
+
+### Why is this Important?
+There are many ways to deploy a kubernetes cluster from a fully manual procedure to using a fully automated or opinionated SaaS. Cluster sizes can also widely vary from a single node deployment on your laptop, to thousands of nodes in a single logical cluster, or even across multiple clusters. Thus, picking a deployment model that suits the scale that you need as your business grows is important. 
+
 ## Install the DC/OS Kubernetes CLI:
 The DC/OS Kubernetes CLI aims to help operators deploy, operate, maintain, and troubleshoot Kubernetes clusters running on DC/OS
 ```
@@ -74,4 +81,4 @@ Login using the config file.
 
 ## Finished with the Lab 1 - Deploying Kubernetes
 
-[Move to Lab 2 - Scaling](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab2_scaling.md)
+[Move to Lab 2 - Scaling](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab2_scaling.md)

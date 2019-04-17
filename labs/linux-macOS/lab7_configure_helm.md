@@ -1,6 +1,11 @@
 # Lab 7: Configure Helm
 
-Helm is a package manager for Kubernetes. Helm Charts helps you define, install, and upgrade even the most complex Kubernetes applications.
+### Objectives
+- Install helm on your local machine
+- Install tiller on your kubernetes cluster to interact with helm
+
+### Why is this Important?
+Helm is a package manager for kubernetes. Helm Charts helps you define, install, and upgrade even the most complex kubernetes applications. Helm also allows you to provide application configuration during deployment. It lowers the bar of entry for coders not yet familiar with kubernetes by providing a yum-like user experience with an intuitive CLI that is familiar.
 
 ## Install Helm on your local machine
 Intall Helm on your local machine using the instructions available at the URL below:
@@ -52,4 +57,4 @@ helm --kubeconfig=./config.cluster${CLUSTER} init --service-account tiller
 
 ## Finished with the Lab 7 - Configure Helm
 
-[Move to Lab 8 - Istio](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab8_istio.md)
+[Move to Lab 8 - Istio](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab8_istio.md)

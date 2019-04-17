@@ -1,6 +1,13 @@
 # Lab 4: Expose a Kubernetes Application using a Service Type Load Balancer (L4) and Ingress (L7)
-
 To expose your applications using running on Kubernetes using L4/L7 we can use DC/OS EdgeLB and a new service called dklb. To be able to use dklb, you need to deploy it in your Kubernetes cluster
+
+### Objectives
+- Install dklb (DC/OS kubernetes load balancer) on your kubernetes cluster
+- Deploy a Redis pod and expose it using a Service Type Load Balancer (L4) and validate that the connection is exposed to the outside
+- Deploy a couple hello-world applications and expose using type NodePort. Then expose your applications using an Ingress service (L7) and validate that the connection is exposed to the outside
+
+### Why is this Important?
+Exposing your application on a kubernetes cluster in an Enterprise-grade environment can be challenging to set up. Cloud providers allow for integrations to their load balancing services, but also at a separate cost. DC/OS provides a clean, self-service integration to our load balancing service Edge-LB that allows users to easily expose their applications using just a few annotations. Submit your typical Pod, Service, and Ingress manifests and DKLB will do the rest - dynamically build a load balanced pool and expose your applications for both L4 (TCP) and L7 (HTTP) connections. 
 
 ## Install Edge-LB CLI
 ```
@@ -183,31 +190,6 @@ curl -H "Host: http-echo-${CLUSTER}-1.com" http://${PUBLICIP}:90${CLUSTER}
 curl -H "Host: http-echo-${CLUSTER}-2.com" http://${PUBLICIP}:90${CLUSTER}
 ```
 
-## Remove the Redis Pod/Service
-```
-kubectl --kubeconfig=./config.cluster${CLUSTER} delete pod redis
-kubectl --kubeconfig=./config.cluster${CLUSTER} delete service redis
-```
-
-## Remove the hello-world Pod/Service/Ingress
-
-Remove the http-echo pods
-```
-kubectl --kubeconfig=./config.cluster${CLUSTER} delete pod http-echo-1
-kubectl --kubeconfig=./config.cluster${CLUSTER} delete pod http-echo-2
-```
-
-Remove the http-echo services
-```
-kubectl --kubeconfig=./config.cluster${CLUSTER} delete service http-echo-1
-kubectl --kubeconfig=./config.cluster${CLUSTER} delete service http-echo-2
-```
-
-Remove the dklb-echo ingress
-```
-kubectl --kubeconfig=./config.cluster${CLUSTER} delete ingress dklb-echo
-```
-
 ## Finished with the Lab 4 - Load Balancing
 
-[Move to Lab 5 - Portworx Storage](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab5_portworxstorage.md)
+[Move to Lab 5 - Portworx Storage](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab5_portworxstorage.md)
