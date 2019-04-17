@@ -84,11 +84,9 @@ set CLUSTER=<the number assigned by the instructor: 01, 02, ..>
 
 Log into the DC/OS Kubernetes cluster with the information provided by your instructor and download the DC/OS CLI.
 
-Run the following command to setup the DC/OS CLI:
+On the top right corner, click on the name of the cluster and then on `Install CLI`.
 
-```
-dcos cluster setup https://<IP provided by the instructor>
-```
+Copy and paste the instruction for your Operation System in your shell.
 
 Run the following command to add the DC/OS Enterprise extensions to the DC/OS CLI:
 

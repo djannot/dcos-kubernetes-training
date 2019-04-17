@@ -1,10 +1,10 @@
 # Pre requisites
 
 export APPNAME=training
-export PUBLICIP=18.233.105.3
-export CLUSTER=djannot
+export PUBLICIP=107.23.75.102
+export CLUSTER=k8straining
 export REGION=us-east-1
-clusters=60
+clusters=35
 
 loadbalancer=ext-$CLUSTER
 eval $(maws login 110465657741_Mesosphere-PowerUser)
