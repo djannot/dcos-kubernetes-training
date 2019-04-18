@@ -5,6 +5,9 @@ export CLUSTER=k8straining-clustertest
 export REGION=us-west-2
 clusters=40
 
+#### Remove all DC/OS Clusters
+rm -rf ~/.dcos/clusters
+
 #### SETUP MASTER URL VARIABLE
 
 # NOTE: elb url is not used in this script (yet) TODO
