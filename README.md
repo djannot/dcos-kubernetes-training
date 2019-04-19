@@ -57,7 +57,36 @@ For CSI, you need to attach the following inline IAM policy to your AWS instance
 }
 ```
 
-The beginning of the `install.sh` file can be used to deploy all the pre requisites.
+You can use the `main.tf` file to deploy the DC/OS cluster in AWS using the following commands:
+
+```
+terraform init
+terraform apply -auto-approve
+```
+
+The `prerequisites.sh` script can be used to deploy all the pre requisites in a few minutes.
+
+You just need to update the 4 variables at the beginning of the file:
+
+```
+export APPNAME=training
+export PUBLICIP=107.23.75.102
+export CLUSTER=k8straining
+export REGION=us-east-1
+clusters=35
+```
+
+`PUBLICIP` is the IP of the AWS Load Balancer in front of the DC/OS public nodes.
+
+`CLUSTER` is the name of the DC/OS cluster specified in the Terraform script.
+
+`REGION` is the AWS region.
+
+`clusters` is the maximum number of students you expect.
+
+At the end of the training, you can use the `detach-and-delete-volumes.sh` script to delete the AWS EBS volumes created for Portworx.
+
+But you need to manually delete the AWS EBS volumes created by the students during the CSI lab and to delete the CSI inline IAM policy before you destroy your DC/OS cluster.
 
 ### For the students
 
