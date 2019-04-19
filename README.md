@@ -84,9 +84,9 @@ clusters=35
 
 `clusters` is the maximum number of students you expect.
 
-At the end of the training, you can use the `detach-and-delete-volumes.sh` script to delete the AWS EBS volumes created for Portworx.
+At the end of the training, after deleting your cluster using Terraform, use the `detach-and-delete-volumes.sh` script to delete the AWS EBS volumes created for Portworx and by CSI. Make sure you set the `CLUSTER` and `REGION` variables with the same values you set in the `prerequisites.sh` script
 
-But you need to manually delete the AWS EBS volumes created by the students during the CSI lab and to delete the CSI inline IAM policy before you destroy your DC/OS cluster.
+But you need to manually delete the CSI inline IAM policy before you destroy your DC/OS cluster.
 
 ### For the students
 
