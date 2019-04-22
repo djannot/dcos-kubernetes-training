@@ -1,11 +1,10 @@
-# Pre requisites
-
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=54.149.137.143
-export CLUSTER=k8straining-clustertest
+export PUBLICIP=34.209.90.37
+export CLUSTER=k8s-training
 export REGION=us-west-2
-clusters=1
+export clusters=25
+export maws=398053451782_Mesosphere-PowerUser
 
 #### Remove all DC/OS Clusters
 rm -rf ~/.dcos/clusters
@@ -29,13 +28,13 @@ MASTER_URL=$(echo $1 | sed 's/http/https/')
 ./scripts/setup_cli.sh $MASTER_URL
 
 loadbalancer=ext-$CLUSTER
-eval $(maws login 398053451782_Mesosphere-PowerUser)
+eval $(maws login ${maws})
 # The group ID of the AWS Security Group of the DC/OS public nodes
 group=$(aws --region=$REGION ec2 describe-instances |  jq --raw-output ".Reservations[].Instances[] | select((.Tags | length) > 0) | select(.Tags[].Value | test(\"${CLUSTER}-publicagent\")) | select(.State.Name | test(\"running\")) | .SecurityGroups[] | [.GroupName, .GroupId] | \"\(.[0]) \(.[1])\"" | grep public-agents-lb-firewall | awk '{ print $2 }' | sort -u)
 
-./scripts/create-and-attach-volumes.sh
-./scripts/create-csi-iam-policy.sh
-./scripts/update-aws-network-configuration.sh ${clusters} ${loadbalancer} ${group}
+./scripts/create-and-attach-volumes.sh ${maws}
+./scripts/create-csi-iam-policy.sh ${maws}
+./scripts/update-aws-network-configuration.sh ${clusters} ${loadbalancer} ${group} ${maws}
 
 dcos package install --yes --cli dcos-enterprise-cli
 
@@ -56,6 +55,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   echo "$PUBLICIP ${APPNAME}.prod.k8s.cluster${i}.mesos.lab" >>./hosts
 done
 sudo mv hosts /etc/hosts
+
 
 # 1. Deploy a Kubernetes cluster
 

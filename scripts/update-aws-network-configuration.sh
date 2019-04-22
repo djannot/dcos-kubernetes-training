@@ -1,7 +1,8 @@
 clusters=$1
 loadbalancer=$2
 group=$3
-eval $(maws login 398053451782_Mesosphere-PowerUser)
+maws=$4
+eval $(maws login ${maws})
 aws --region=${REGION} elb create-load-balancer-listeners --load-balancer-name=${loadbalancer} --listeners Protocol=TCP,LoadBalancerPort=8443,InstanceProtocol=TCP,InstancePort=8443
 awk -v clusters=${clusters} 'BEGIN { for (i=0; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   aws --region=${REGION} elb create-load-balancer-listeners --load-balancer-name=${loadbalancer} --listeners Protocol=TCP,LoadBalancerPort=80${i},InstanceProtocol=TCP,InstancePort=80${i}

@@ -1,9 +1,9 @@
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=54.149.137.143
-export CLUSTER=k8straining-clustertest
+export PUBLICIP=34.209.90.37
+export CLUSTER=k8s-training
 export REGION=us-west-2
-clusters=1
+export clusters=25
 
 # 1. Deploy a Kubernetes cluster
 
