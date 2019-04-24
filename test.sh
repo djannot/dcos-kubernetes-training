@@ -1,7 +1,7 @@
 # Pre requisites
 
 export APPNAME=training
-export PUBLICIP=3.209.22.159
+export PUBLICIP=107.23.75.102
 export CLUSTER=k8straining
 export REGION=us-east-1
 clusters=35
@@ -131,12 +131,9 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    kubernetes.dcos.io/dklb-config: |
-      name: dklb
-      size: 2
-      frontends:
-      - port: 80${i}
-        servicePort: 6379
+    kubernetes.dcos.io/edgelb-pool-name: "dklb"
+    kubernetes.dcos.io/edgelb-pool-size: "2"
+    kubernetes.dcos.io/edgelb-pool-portmap.6379: "80${i}"
   labels:
     app: redis
   name: redis
@@ -187,12 +184,9 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: edgelb
-    kubernetes.dcos.io/dklb-config: |
-      name: dklb
-      size: 2
-      frontends:
-        http:
-          port: 90${i}
+    kubernetes.dcos.io/edgelb-pool-name: "dklb"
+    kubernetes.dcos.io/edgelb-pool-size: "2"
+    kubernetes.dcos.io/edgelb-pool-port: "90${i}"
   labels:
     owner: dklb
   name: dklb-echo

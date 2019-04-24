@@ -38,10 +38,11 @@ rules:
   verbs:
   - list
   - watch
-# Allow for listing/watching Service resources.
+# Allow for listing/watching ConfigMap and Service resources.
 - apiGroups:
   - ""
   resources:
+  - configmaps
   - services
   verbs:
   - list
@@ -62,7 +63,7 @@ rules:
   - update
 # Allow for reading, creating and updating MutatingWebhookConfiguration resources.
 - apiGroups:
-  - admissionregistration.k8s.io
+  - "admissionregistration.k8s.io"
   resources:
   - mutatingwebhookconfigurations
   verbs:

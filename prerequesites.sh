@@ -1,5 +1,5 @@
 export APPNAME=training
-export PUBLICIP=18.204.164.210
+export PUBLICIP=107.23.75.102
 export CLUSTER=k8straining
 export REGION=us-east-1
 clusters=35
