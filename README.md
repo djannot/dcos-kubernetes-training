@@ -470,9 +470,12 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    kubernetes.dcos.io/edgelb-pool-name: "dklb"
-    kubernetes.dcos.io/edgelb-pool-size: "2"
-    kubernetes.dcos.io/edgelb-pool-portmap.6379: "80${CLUSTER}"
+    kubernetes.dcos.io/dklb-config: |
+      name: dklb
+      size: 2
+      frontends:
+      - port: 80${CLUSTER}
+        servicePort: 6379
   labels:
     app: redis
   name: redis
@@ -573,9 +576,12 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: edgelb
-    kubernetes.dcos.io/edgelb-pool-name: "dklb"
-    kubernetes.dcos.io/edgelb-pool-size: "2"
-    kubernetes.dcos.io/edgelb-pool-port: "90${CLUSTER}"
+    kubernetes.dcos.io/dklb-config: |
+      name: dklb
+      size: 2
+      frontends:
+        http:
+          port: 90${CLUSTER}
   labels:
     owner: dklb
   name: dklb-echo
