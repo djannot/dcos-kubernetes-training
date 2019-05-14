@@ -1,0 +1,100 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: dklb
+  name: dklb
+  namespace: kube-system
+spec:
+  selector:
+    app: dklb
+  ports:
+  - name: default-backend
+    port: 80
+    targetPort: 8080
+  - name: admission
+    port: 443
+    targetPort: 8443
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: dklb
+  name: dklb
+  namespace: kube-system
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dklb
+  template:
+    metadata:
+      labels:
+        app: dklb
+    spec:
+      priorityClassName: system-node-critical
+      containers:
+      - name: dklb
+        image: mesosphere/dklb:v0.1.0-alpha.8
+        imagePullPolicy: Always
+        args:
+        - /dklb
+        - --admission-tls-ca-bundle
+        - "$(CA_BUNDLE)"
+        - --admission-tls-cert-file
+        - /tls/tls.crt
+        - --admission-tls-private-key-file
+        - /tls/tls.key
+        - --pod-namespace
+        # NOTE: Populated from the "downward API".
+        - "$(POD_NAMESPACE)"
+        - --pod-name
+        # NOTE: Populated from the "downward API".
+        - "$(POD_NAME)"
+        - --kubernetes-cluster-framework-name
+        # NOTE: Populated from the "kube-system/mke-cluster-info" configmap.
+        - "$(CLUSTER_NAME)"
+        - --log-level
+        - debug
+        # NOTE: Must be changed whenever EdgeLB is installed under a DC/OS service group other than "dcos-edgelb".
+        - --edgelb-pool-group
+        - infra/network/dcos-edgelb/pools
+        ports:
+        - name: default-backend
+          containerPort: 8080
+        - name: admission
+          containerPort: 8443
+        - name: metrics
+          containerPort: 10250
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: admission
+            scheme: HTTPS
+        envFrom:
+        - configMapRef:
+            name: mke-cluster-info
+        env:
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.name
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "10m"
+        volumeMounts:
+          - name: dklb-tls
+            mountPath: /tls
+            readOnly: true
+      serviceAccountName: dklb
+      volumes:
+        - name: dklb-tls
+          secret:
+            secretName: dklb-tls
