@@ -20,7 +20,7 @@ kubectl --kubeconfig=./config.cluster%CLUSTER% create -f dklb-deployment.yaml
 
 You can use the Kubernetes Dashboard to check that the deployment dklb is running in the kube-system namespace
 
-![Kubernetes dashboard dklb](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab4_1.png)
+![Kubernetes dashboard dklb](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab4_1.png)
 
 ## Deploy a Redis Pod
 You can now deploy a redis Pod on your Kubernetes cluster running the following command
@@ -88,13 +88,11 @@ Output should look similar to below:
 $ dcos edgelb list
   NAME    APIVERSION  COUNT  ROLE          PORTS
   all     V2          2      slave_public  9091, 8443
-  dklb    V2          2      slave_public  0, 8001, 9001, 10001
-  dklb02  V2          2      slave_public  0, 8002
-  dklb03  V2          2      slave_public  0, 8003
+  dklb01  V2          2      slave_public  0, 8001
   ```
 
 You can also see pools being dynamically created in the UI:
-![dklb pool](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab4_2.png)
+![dklb pool](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab4_2.png)
 
 ## Validate Redis connection
 You can validate that you can access the redis POD from your laptop using telnet:
@@ -179,9 +177,7 @@ Output should look like below:
 $ dcos edgelb list
   NAME    APIVERSION  COUNT  ROLE          PORTS
   all     V2          2      slave_public  9091, 8443
-  dklb    V2          2      slave_public  0, 8001, 9001, 10001
-  dklb02  V2          2      slave_public  0, 8002, 9002, 10002
-  dklb03  V2          2      slave_public  0, 8003, 9003
+  dklb01  V2          2      slave_public  0, 8001, 9001
   ```
 
 ## Validate Ingress connection
@@ -218,4 +214,4 @@ kubectl --kubeconfig=./config.cluster%CLUSTER% delete ingress dklb-echo
 
 ## Finished with the Lab 4 - Load Balancing
 
-[Move to Lab 5 - Portworx Storage](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab5_portworxstorage.md)
+[Move to Lab 5 - Portworx Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab5_portworxstorage.md)

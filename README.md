@@ -19,7 +19,7 @@ During this training, you'll learn how to use the main capabilities of Kubernete
 
 Clone this Repo:
 ```
-git clone https://github.com/ably77/dcos-kubernetes-training.git
+git clone https://github.com/djannot/dcos-kubernetes-training.git
 ```
 
 Change directory to dcos-kubernetes-training
@@ -27,8 +27,8 @@ Change directory to dcos-kubernetes-training
 cd dcos-kubernetes-training
 ```
 
-## [Instructors / Platform Operators](https://github.com/ably77/dcos-kubernetes-training/tree/master/instructor.md)
+## [Instructors / Platform Operators](https://github.com/djannot/dcos-kubernetes-training/tree/master/instructor.md)
 Follow the link above to access the Instructors README to set up the lab cluster
 
-## [Student / Development or DevOps teams](https://github.com/ably77/dcos-kubernetes-training/tree/master/labs)
+## [Student / Development or DevOps teams](https://github.com/djannot/dcos-kubernetes-training/tree/master/labs)
 Follow the link above to access the Course Labs

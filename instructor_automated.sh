@@ -1,10 +1,10 @@
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=34.209.90.37
-export CLUSTER=k8s-training
-export REGION=us-west-2
-export clusters=25
-export maws=398053451782_Mesosphere-PowerUser
+export PUBLICIP=34.193.81.97
+export CLUSTER=djannot
+export REGION=us-east-1
+export clusters=3
+export maws=110465657741_Mesosphere-PowerUser
 
 #### Remove all DC/OS Clusters
 rm -rf ~/.dcos/clusters

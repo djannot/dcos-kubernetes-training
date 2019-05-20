@@ -17,7 +17,7 @@ Mesosphere provides multiple ways to achieving persistent storage for containeri
 
 To be able to use Portworx persistent storage on your Kubernetes cluster, you need to deploy it in your Kubernetes cluster using the following command:
 ```
-kubectl --kubeconfig=./config.cluster${CLUSTER} apply -f "https://install.portworx.com/2.0?kbver=1.13.3&b=true&dcos=true&stork=true"
+kubectl --kubeconfig=./config.cluster${CLUSTER} apply -f "https://install.portworx.com/2.0?kbver=1.14.1&b=true&dcos=true&stork=true"
 ```
 
 ## Create Kubernetes StorageClass
@@ -66,7 +66,7 @@ kubectl --kubeconfig=./config.cluster${CLUSTER} describe pvc pvc001
 
 Wait as the PVC is being built, this may take a few moments. Output should looks similar to below:
 ```
-$ kubectl describe pvc pvc001
+kubectl --kubeconfig=./config.cluster${CLUSTER} describe pvc pvc001
 Name:          pvc001
 Namespace:     default
 StorageClass:  portworx-sc
@@ -176,4 +176,4 @@ kubectl --kubeconfig=./config.cluster${CLUSTER} delete pod pvpod2
 
 ## Finished with the Lab 5 - Portworx Storage
 
-[Move to Lab 6 - CSI Storage](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab6_csi_storage.md)
+[Move to Lab 6 - CSI Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab6_csi_storage.md)

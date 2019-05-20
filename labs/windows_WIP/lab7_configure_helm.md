@@ -47,4 +47,4 @@ helm --kubeconfig=./config.cluster%CLUSTER% init --service-account tiller
 
 ## Finished with the Lab 7 - Configure Helm
 
-[Move to Lab 8 - Istio](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab8_istio.md)
+[Move to Lab 8 - Istio](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab8_istio.md)

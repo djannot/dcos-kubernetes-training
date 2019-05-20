@@ -213,7 +213,7 @@ Go to the following URL to access the application through your web browser:
 open http://${PUBLICIP}:100${CLUSTER}/productpage
 ```
 
-![Istio - bookstore app](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab8_1.png)
+![Istio - bookstore app](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab8_1.png)
 
 ## Other Istio Features
 You can then follow the other steps described in the Istio documentation to understand the different Istio features:

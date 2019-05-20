@@ -58,7 +58,7 @@ dcos security org users grant %serviceaccount% dcos:mesos:master:volume:role:sla
 dcos security org users grant %serviceaccount% dcos:mesos:master:framework:role:slave_public read
 dcos security org users grant %serviceaccount% dcos:mesos:agent:framework:role:slave_public read
 
-dcos kubernetes cluster create --yes --options=options-kubernetes-cluster%1%.json --package-version=2.2.1-1.13.4
+dcos kubernetes cluster create --yes --options=options-kubernetes-cluster%1%.json --package-version=2.2.2-1.13.5
 ```
 
 ## Deploy Kubernetes
@@ -99,9 +99,9 @@ Output should look similar to below:
 ```
 $ kubectl --kubeconfig=./config.cluster%CLUSTER% get nodes
 NAME                                                           STATUS   ROLES    AGE   VERSION
-kube-control-plane-0-instance.trainingprodk8scluster01.mesos   Ready    master   17m   v1.13.4
-kube-node-0-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.13.4
-kube-node-1-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.13.4
+kube-control-plane-0-instance.trainingprodk8scluster01.mesos   Ready    master   17m   v1.13.5
+kube-node-0-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.13.5
+kube-node-1-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.13.5
 ```
 
 ## Connect to the Kubernetes dashboard
@@ -117,8 +117,8 @@ Open the following page in your web browser:
 
 Login using the config file.
 
-![Kubernetes dashboard](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab1_1.png)
+![Kubernetes dashboard](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab1_1.png)
 
 ## Finished with the Lab 1 - Deploying Kubernetes
 
-[Move to Lab 2 - Scaling](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab2_scaling.md)
+[Move to Lab 2 - Scaling](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab2_scaling.md)

@@ -87,5 +87,5 @@ Run the automated install to get the DC/OS cluster set up with MKE and EdgeLB:
 ./instructor_automated.sh
 ```
 
-# [Teardown Instructions for once the Lab is Completed](https://github.com/ably77/dcos-kubernetes-training/tree/master/teardown.md)
+# [Teardown Instructions for once the Lab is Completed](https://github.com/djannot7/dcos-kubernetes-training/tree/master/teardown.md)
 Follow the link above to access teardown instructions for the cluster

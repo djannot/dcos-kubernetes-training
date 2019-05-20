@@ -1,9 +1,9 @@
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=34.209.90.37
-export CLUSTER=k8s-training
-export REGION=us-west-2
-export clusters=25
+export PUBLICIP=54.162.3.167
+export CLUSTER=djannot
+export REGION=us-east-1
+export clusters=2
 
 # 1. Deploy a Kubernetes cluster
 
@@ -39,7 +39,7 @@ done
 # 3. Upgrade your Kubernetes cluster
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --package-version=2.2.2-1.13.5 --yes
+  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --package-version=2.3.0-1.14.1 --yes
 done
 
 ## DCOS Authentication (not part of the training)
@@ -378,7 +378,7 @@ spec:
       - name: ebs-dynamic-app
         image: centos:7
         command: ["/bin/sh"]
-        args: ["-c", "while true; do echo $(date -u) >> /data/out.txt; sleep 5; done"]
+        args: ["-c", "while true; do echo \$(date -u) >> /data/out.txt; sleep 5; done"]
         volumeMounts:
         - name: persistent-storage
           mountPath: /data

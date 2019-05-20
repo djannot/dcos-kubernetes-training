@@ -31,7 +31,7 @@ Log into the DC/OS Kubernetes cluster with the information provided by your inst
 
 Windows:
 Follow the instructions located in the top-right dropdown to install the DC/OS CLI on a Windows machine
-![Install Windows CLI](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab0_1.png)
+![Install Windows CLI](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab0_1.png)
 
 ## Set up DC/OS CLI Using HTTPS (required by Kubernetes)
 Run the following command to setup the DC/OS CLI:
@@ -88,4 +88,4 @@ We will be using this hostname translation when connecting to our kubernetes clu
 
 ## Finished with the Lab 0 - Prerequisites
 
-[Move to Lab 1 - Deploying Kubernetes](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab1_deploying_kubernetes.md)
+[Move to Lab 1 - Deploying Kubernetes](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab1_deploying_kubernetes.md)

@@ -28,7 +28,7 @@ dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster%CLUSTER%
 
 Navigate to the UI --> services --> training --> prod --> k8s --> cluster${CLUSTER} to see the upgrade visually
 
-![Scaling - DC/OS Services Console](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab2_1.png)
+![Scaling - DC/OS Services Console](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab2_1.png)
 
 Output should look similar to below once completed
 ```
@@ -46,8 +46,8 @@ dcos kubernetes cluster debug plan status deploy --cluster-name=%APPNAME%/prod/k
 
 You can check that the new node is shown in the Kubernetes Dashboard:
 
-![Kubernetes dashboard scaled](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab2_2.png)
+![Kubernetes dashboard scaled](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab2_2.png)
 
 ## Finished with the Lab 2 - Scaling
 
-[Move to Lab 3 - Upgrading Kubernetes](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab3_upgrading.md)
+[Move to Lab 3 - Upgrading Kubernetes](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab3_upgrading.md)

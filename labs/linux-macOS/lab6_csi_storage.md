@@ -138,4 +138,4 @@ kubectl --kubeconfig=./config.cluster${CLUSTER} exec -i $pod cat /data/out.txt
 
 ## Finished with the Lab 6 - CSI Storage
 
-[Move to Lab 7 - Configuring Helm](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab7_configure_helm.md)
+[Move to Lab 7 - Configuring Helm](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab7_configure_helm.md)

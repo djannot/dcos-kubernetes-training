@@ -9,7 +9,7 @@ dcos kubernetes manager update package-versions
 ## Upgrade Kubernetes cluster
 Run the following command to upgrade your Kubernetes cluster:
 ```
-dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster%CLUSTER% --package-version=2.2.2-1.13.5
+dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster%CLUSTER% --package-version=2.3.0-1.14.1
 ```
 
 ## Watch your Kubernetes cluster upgrade
@@ -52,15 +52,15 @@ Output should look similar to below:
 ```
 kubectl --kubeconfig=./config.cluster%CLUSTER% get nodes
 NAME                                                          STATUS   ROLES    AGE   VERSION
-kube-control-plane-0-instance.trainingprodk8scluster%CLUSTER}.mesos   Ready    master   94m   v1.13.5
-kube-node-0-kubelet.trainingprodk8scluster%CLUSTER}.mesos             Ready    <none>   92m   v1.13.5
-kube-node-1-kubelet.trainingprodk8scluster%CLUSTER}.mesos             Ready    <none>   92m   v1.13.5
-kube-node-2-kubelet.trainingprodk8scluster%CLUSTER}.mesos             Ready    <none>   36m   v1.13.5
+kube-control-plane-0-instance.trainingprodk8scluster%CLUSTER}.mesos   Ready    master   94m   v1.14.1
+kube-node-0-kubelet.trainingprodk8scluster%CLUSTER}.mesos             Ready    <none>   92m   v1.14.1
+kube-node-1-kubelet.trainingprodk8scluster%CLUSTER}.mesos             Ready    <none>   92m   v1.14.1
+kube-node-2-kubelet.trainingprodk8scluster%CLUSTER}.mesos             Ready    <none>   36m   v1.14.1
 ```
 
 You can also see in the UI that cluster01 has been upgraded to 1.13.5
-![Upgrade](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab3_1.png)
+![Upgrade](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab3_1.png)
 
 ## Finished with the Lab 3 - Upgrading
 
-[Move to Lab 4 - Loadbalancing](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab4_loadbalancing.md)
+[Move to Lab 4 - Loadbalancing](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab4_loadbalancing.md)
