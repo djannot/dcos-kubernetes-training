@@ -7,7 +7,7 @@ To expose your applications using running on Kubernetes using L4/L7 we can use D
 - Deploy a couple hello-world applications and expose using type NodePort. Then expose your applications using an Ingress service (L7) and validate that the connection is exposed to the outside
 
 ### Why is this Important?
-Exposing your application on a kubernetes cluster in an Enterprise-grade environment can be challenging to set up. Cloud providers allow for integrations to their load balancing services, but also at a separate cost. DC/OS provides a clean, self-service integration to our load balancing service Edge-LB that allows users to easily expose their applications using just a few annotations. Submit your typical Pod, Service, and Ingress manifests and DKLB will do the rest - dynamically build a load balanced pool and expose your applications for both L4 (TCP) and L7 (HTTP) connections. 
+Exposing your application on a kubernetes cluster in an Enterprise-grade environment can be challenging to set up. Cloud providers allow for integrations to their load balancing services, but also at a separate cost. DC/OS provides a clean, self-service integration to our load balancing service Edge-LB that allows users to easily expose their applications using just a few annotations. Submit your typical Pod, Service, and Ingress manifests and DKLB will do the rest - dynamically build a load balanced pool and expose your applications for both L4 (TCP) and L7 (HTTP) connections.
 
 ## Install Edge-LB CLI
 ```
@@ -27,7 +27,7 @@ kubectl --kubeconfig=./config.cluster${CLUSTER} create -f dklb-deployment.yaml
 
 You can use the Kubernetes Dashboard to check that the deployment dklb is running in the kube-system namespace
 
-![Kubernetes dashboard dklb](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab4_1.png)
+![Kubernetes dashboard dklb](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab4_1.png)
 
 ## Deploy a Redis Pod
 You can now deploy a redis Pod on your Kubernetes cluster running the following command
@@ -95,13 +95,11 @@ Output should look similar to below:
 $ dcos edgelb list
   NAME    APIVERSION  COUNT  ROLE          PORTS
   all     V2          2      slave_public  9091, 8443
-  dklb    V2          2      slave_public  0, 8001, 9001, 10001
-  dklb02  V2          2      slave_public  0, 8002
-  dklb03  V2          2      slave_public  0, 8003
+  dklb01  V2          2      slave_public  0, 8001
   ```
 
 You can also see pools being dynamically created in the UI:
-![dklb pool](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab4_2.png)
+![dklb pool](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab4_2.png)
 
 ## Validate Redis connection
 You can validate that you can access the redis POD from your laptop using telnet:
@@ -178,9 +176,7 @@ Output should look like below:
 $ dcos edgelb list
   NAME    APIVERSION  COUNT  ROLE          PORTS
   all     V2          2      slave_public  9091, 8443
-  dklb    V2          2      slave_public  0, 8001, 9001, 10001
-  dklb02  V2          2      slave_public  0, 8002, 9002, 10002
-  dklb03  V2          2      slave_public  0, 8003, 9003
+  dklb01  V2          2      slave_public  0, 8001, 9001
   ```
 
 ## Validate Ingress connection
@@ -192,4 +188,4 @@ curl -H "Host: http-echo-${CLUSTER}-2.com" http://${PUBLICIP}:90${CLUSTER}
 
 ## Finished with the Lab 4 - Load Balancing
 
-[Move to Lab 5 - Portworx Storage](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab5_portworxstorage.md)
+[Move to Lab 5 - Portworx Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab5_portworxstorage.md)

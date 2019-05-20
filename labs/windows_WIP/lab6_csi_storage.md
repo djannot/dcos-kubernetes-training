@@ -74,7 +74,7 @@ set FILE=deployment.yml
 >>%FILE% echo       - name: ebs-dynamic-app
 >>%FILE% echo         image: centos:7
 >>%FILE% echo         command: ["/bin/sh"]
->>%FILE% echo         args: ["-c", "while true; do echo $(date -u) >> /data/out.txt; sleep 5; done"]
+>>%FILE% echo         args: ["-c", "while true; do echo \$(date -u) >> /data/out.txt; sleep 5; done"]
 >>%FILE% echo         volumeMounts:
 >>%FILE% echo         - name: persistent-storage
 >>%FILE% echo           mountPath: /data
@@ -125,4 +125,4 @@ Check the content of the file /data/out.txt and verify that the first timestamp 
 
 ## Finished with the Lab 6 - CSI Storage
 
-[Move to Lab 7 - Configuring Helm](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/lab7_configure_helm.md)
+[Move to Lab 7 - Configuring Helm](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab7_configure_helm.md)

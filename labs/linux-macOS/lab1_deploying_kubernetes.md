@@ -5,7 +5,7 @@
 - Connect to the kubernetes cluster using kubectl and access the dashboard through a browser on your local machine
 
 ### Why is this Important?
-There are many ways to deploy a kubernetes cluster from a fully manual procedure to using a fully automated or opinionated SaaS. Cluster sizes can also widely vary from a single node deployment on your laptop, to thousands of nodes in a single logical cluster, or even across multiple clusters. Thus, picking a deployment model that suits the scale that you need as your business grows is important. 
+There are many ways to deploy a kubernetes cluster from a fully manual procedure to using a fully automated or opinionated SaaS. Cluster sizes can also widely vary from a single node deployment on your laptop, to thousands of nodes in a single logical cluster, or even across multiple clusters. Thus, picking a deployment model that suits the scale that you need as your business grows is important.
 
 ## Install the DC/OS Kubernetes CLI:
 The DC/OS Kubernetes CLI aims to help operators deploy, operate, maintain, and troubleshoot Kubernetes clusters running on DC/OS
@@ -29,7 +29,7 @@ sed "s/TOBEREPLACED/${CLUSTER}/g" options-kubernetes-cluster.json.template > opt
 
 To deploy your kubernetes cluster:
 ```
-dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${CLUSTER}.json --package-version=2.2.1-1.13.4
+dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${CLUSTER}.json --package-version=2.2.2-1.13.5
 ```
 
 To see the status of your Kubernetes cluster deployment run:
@@ -59,9 +59,9 @@ Output should look similar to below:
 ```
 $ kubectl get nodes
 NAME                                                           STATUS   ROLES    AGE   VERSION
-kube-control-plane-0-instance.trainingprodk8scluster01.mesos   Ready    master   17m   v1.13.4
-kube-node-0-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.13.4
-kube-node-1-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.13.4
+kube-control-plane-0-instance.trainingprodk8scluster01.mesos   Ready    master   17m   v1.13.5
+kube-node-0-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.13.5
+kube-node-1-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.13.5
 ```
 
 ## Connect to the Kubernetes dashboard
@@ -77,8 +77,8 @@ Open the following page in your web browser:
 
 Login using the config file.
 
-![Kubernetes dashboard](https://github.com/ably77/dcos-kubernetes-training/blob/master/images/lab1_1.png)
+![Kubernetes dashboard](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab1_1.png)
 
 ## Finished with the Lab 1 - Deploying Kubernetes
 
-[Move to Lab 2 - Scaling](https://github.com/ably77/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab2_scaling.md)
+[Move to Lab 2 - Scaling](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab2_scaling.md)

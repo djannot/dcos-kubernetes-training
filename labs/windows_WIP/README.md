@@ -14,3 +14,5 @@ During this training, you'll learn how to use the main capabilities of Kubernete
 - Configure Helm
 - Deploy Istio using Helm
 - Deploy an application on Istio
+
+[Move to Lab 0 - Prerequisites](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab0_prerequisites.md)
