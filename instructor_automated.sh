@@ -1,6 +1,6 @@
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=34.193.81.97
+export PUBLICIP=3.211.150.99
 export CLUSTER=djannot
 export REGION=us-east-1
 export clusters=3
