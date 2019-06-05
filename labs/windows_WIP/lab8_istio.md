@@ -10,4 +10,8 @@ You can download/explore the latest releases using the URL below:
 
 # Currently Work in Progress
 
-Unfortunately this guide does not currently provide instructions on how to deploy Istio on Windows workstations. Please pair with a neighbor that has a Linux workstation to complete this lab
+Unfortunately this guide does not currently provide instructions on how to deploy Istio on Windows workstations. Please pair with a neighbour that has a Linux workstation to complete this lab
+
+## Finished with the Lab 8 - Istio
+
+[Move to Lab 9 - Monitoring](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab9_monitoring.md)

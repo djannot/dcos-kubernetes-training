@@ -220,4 +220,6 @@ You can then follow the other steps described in the Istio documentation to unde
 
 [https://istio.io/docs/examples/bookinfo/](https://istio.io/docs/examples/bookinfo/)
 
-# Congrats! We are now done with all of the labs!
+## Finished with the Lab 8 - Istio
+
+[Move to Lab 9 - Monitoring](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab9_monitoring.md)

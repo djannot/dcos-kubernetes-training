@@ -63,4 +63,4 @@ You can also see in the UI that cluster01 has been upgraded to 1.13.5
 
 ## Finished with the Lab 3 - Upgrading
 
-[Move to Lab 4 - Loadbalancing](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab4_loadbalancing.md)
+[Move to Lab 4 - Loadbalancing](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab4_loadbalancing.md)

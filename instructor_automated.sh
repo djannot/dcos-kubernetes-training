@@ -46,6 +46,9 @@ sed "s/NODES/${nodes}/g" scripts/options-portworx.json.template > scripts/option
 ./scripts/deploy-kubernetes-mke.sh
 ./scripts/check-kubernetes-mke-status.sh
 
+./scripts/deploy-dcos-monitoring.sh
+./scripts/check-status-with-name.sh beta-dcos-monitoring infra/monitoring/dcos-monitoring
+
 ./create-pool-edgelb-all.sh ${clusters}
 ./scripts/deploy-edgelb.sh
 ./scripts/check-app-status.sh infra/network/dcos-edgelb/pools/all

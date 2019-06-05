@@ -165,4 +165,4 @@ kubectl --kubeconfig=./config.cluster%CLUSTER% delete pod pvpod2
 
 ## Finished with the Lab 5 - Portworx Storage
 
-[Move to Lab 6 - CSI Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab6_csi_storage.md)
+[Move to Lab 6 - CSI Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab6_csi_storage.md)

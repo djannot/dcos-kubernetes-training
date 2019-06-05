@@ -32,10 +32,6 @@ Run the following command to update your cluster
 dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${CLUSTER} --options=options-kubernetes-cluster${CLUSTER}.json --yes
 ```
 
-Navigate to the UI --> services --> training --> prod --> k8s --> cluster${CLUSTER} to see the upgrade visually
-
-![Scaling - DC/OS Services Console](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab2_1.png)
-
 Output should look similar to below once completed
 ```
 Using Kubernetes cluster: training/prod/k8s/cluster1
@@ -43,6 +39,10 @@ Using Kubernetes cluster: training/prod/k8s/cluster1
 2019/01/26 14:40:58 waiting for update to finish...
 2019/01/26 14:42:10 update complete!
 ```
+
+Navigate to the UI --> services --> training --> prod --> k8s --> cluster${CLUSTER} to see the update visually
+
+![Scaling - DC/OS Services Console](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab2_1.png)
 
 ## Validate Kubernetes update
 You can also use the CLI to check the status of your update, if you try this in a new tab don't forget to set your variables again

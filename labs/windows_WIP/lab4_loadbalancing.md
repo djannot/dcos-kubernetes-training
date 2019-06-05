@@ -214,4 +214,4 @@ kubectl --kubeconfig=./config.cluster%CLUSTER% delete ingress dklb-echo
 
 ## Finished with the Lab 4 - Load Balancing
 
-[Move to Lab 5 - Portworx Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab5_portworxstorage.md)
+[Move to Lab 5 - Portworx Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab5_portworxstorage.md)

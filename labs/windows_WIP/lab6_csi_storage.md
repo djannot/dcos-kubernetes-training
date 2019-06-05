@@ -125,4 +125,4 @@ Check the content of the file /data/out.txt and verify that the first timestamp 
 
 ## Finished with the Lab 6 - CSI Storage
 
-[Move to Lab 7 - Configuring Helm](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab7_configure_helm.md)
+[Move to Lab 7 - Configuring Helm](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab7_configure_helm.md)

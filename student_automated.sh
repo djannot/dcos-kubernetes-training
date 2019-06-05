@@ -418,7 +418,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   kubectl --kubeconfig=./config.cluster${i} exec $pod cat /data/out.txt
 done
 
-# 8. Configure Helm
+# 7. Configure Helm
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -452,7 +452,7 @@ done
 ## Sleeping 120 seconds to let the tiller spin up
 sleep 120
 
-# 9. Deploy Istio using Helm
+# 8. Deploy Istio using Helm
 
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.6 sh -
 
@@ -468,7 +468,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   --set gateways.istio-ingressgateway.ports[0].nodePort=30000
 done
 
-# 10. Deploy an application on Istio
+# 8. Deploy an application on Istio
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -484,48 +484,9 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   curl -I http://${PUBLICIP}:100${i}/productpage
 done
 
-# 11. Deploy Knative
+# 9. Enable the metrics_exporter
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
-  kubectl --kubeconfig=./config.cluster${i} apply --filename https://github.com/knative/serving/releases/download/v0.4.0/serving.yaml \
-     --filename https://github.com/knative/build/releases/download/v0.4.0/build.yaml \
-     --filename https://github.com/knative/eventing/releases/download/v0.4.0/release.yaml \
-     --filename https://github.com/knative/eventing-sources/releases/download/v0.4.0/release.yaml \
-     --filename https://github.com/knative/serving/releases/download/v0.4.0/monitoring.yaml \
-     --filename https://raw.githubusercontent.com/knative/serving/v0.4.0/third_party/config/build/clusterrole.yaml
-done
-
-## Sleeping 150 seconds to let knative spin up
-sleep 150
-
-# 11. Deploy an application on Knative
-
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
-  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} apply -f -
-apiVersion: serving.knative.dev/v1alpha1 # Current version of Knative
-kind: Service
-metadata:
-  name: helloworld-go # The name of the app
-  namespace: default # The namespace the app will use
-spec:
-  runLatest:
-    configuration:
-      revisionTemplate:
-        spec:
-          container:
-            image: gcr.io/knative-samples/helloworld-go # The URL to the image of the app
-            env:
-              - name: TARGET # The environment variable printed out by the sample app
-                value: "Go Sample v1"
-EOF
-done
-
-## Sleeping 60 seconds to let the knative application spin up
-sleep 60
-
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
-  curl -H "Host: helloworld-go.default.example.com" http://${PUBLICIP}:100${i}
+  sed "s/TOBEREPLACED/${i}/g" scripts/options-kubernetes-metrics-exporter.json.template > scripts/options-kubernetes-update-cluster${i}.json
+  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --options=scripts/options-kubernetes-update-cluster${i}.json --yes
 done

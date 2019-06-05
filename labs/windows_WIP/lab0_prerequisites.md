@@ -88,4 +88,4 @@ We will be using this hostname translation when connecting to our kubernetes clu
 
 ## Finished with the Lab 0 - Prerequisites
 
-[Move to Lab 1 - Deploying Kubernetes](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/lab1_deploying_kubernetes.md)
+[Move to Lab 1 - Deploying Kubernetes](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab1_deploying_kubernetes.md)
