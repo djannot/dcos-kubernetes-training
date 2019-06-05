@@ -104,4 +104,4 @@ kubectl --kubeconfig=./config.cluster%CLUSTER% delete -f deny-ingress.yml
 
 ## Finished with the Lab 5 - Network Policies
 
-[Move to Lab 6 - Portworx Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab5_portworxstorage.md)
+[Move to Lab 6 - Portworx Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab6_portworxstorage.md)

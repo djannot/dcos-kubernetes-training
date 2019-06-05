@@ -112,4 +112,4 @@ EOF
 
 ## Finished with the Lab 5 - Network Policies
 
-[Move to Lab 6 - Portworx Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab5_portworxstorage.md)
+[Move to Lab 6 - Portworx Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab6_portworxstorage.md)
