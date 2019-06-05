@@ -65,13 +65,6 @@ Additionally, if the TLS certificate used by DC/OS is not trusted, you can run t
 dcos config set core.ssl_verify false
 ```
 
-## Install the DC/OS Enterprise CLI
-Run the following command to add the DC/OS Enterprise extensions to the DC/OS CLI:
-
-```
-dcos package install --yes --cli dcos-enterprise-cli
-```
-
 ## Lab Variables
 Run the following command to export the environment variables needed during the labs:
 
