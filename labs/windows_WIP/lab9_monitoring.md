@@ -55,7 +55,7 @@ Navigate to the UI --> services --> infra --> monitoring and click on the small 
 
 Select the Kubernetes: Cluster Health dashboard and then your Kubernetes cluster.
 
-
+![Monitoring - Cluster Health dashboard](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab9_3.png)
 
 Take a look at the other Dashboards available for Kubernetes and for DC/OS itself.
 

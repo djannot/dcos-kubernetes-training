@@ -14,6 +14,7 @@ During this training, you'll learn how to use the main capabilities of Kubernete
 - Configure Helm
 - Deploy Istio using Helm
 - Deploy an application on Istio
+- Monitoring a Kubernetes Cluster
 
 ## Getting Started
 
