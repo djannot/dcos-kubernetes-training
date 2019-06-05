@@ -188,4 +188,4 @@ curl -H "Host: http-echo-${CLUSTER}-2.com" http://${PUBLICIP}:90${CLUSTER}
 
 ## Finished with the Lab 4 - Load Balancing
 
-[Move to Lab 5 - Portworx Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab5_portworxstorage.md)
+[Move to Lab 5 - Network policies](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab5_networkpolicies.md)

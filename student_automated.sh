@@ -134,7 +134,7 @@ done
 #  echo $test
 #done
 
-# 5. Expose a Kubernetes Application using an Ingress (L7)
+# 4. Expose a Kubernetes Application using an Ingress (L7)
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -185,6 +185,107 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   curl -H "Host: http-echo-${i}-1.com" http://${PUBLICIP}:90${i}
   curl -H "Host: http-echo-${i}-2.com" http://${PUBLICIP}:90${i}
+done
+
+# 5. Leverage network policies to restrict access
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+EOF
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  curl -H "Host: http-echo-${i}-1.com" http://${PUBLICIP}:90${i}
+  curl -H "Host: http-echo-${i}-2.com" http://${PUBLICIP}:90${i}
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  telnet ${PUBLICIP} 80${i}
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: access-redis
+spec:
+  podSelector:
+    matchLabels:
+      app: redis
+  ingress:
+  - from: []
+EOF
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  telnet $PUBLICIP 80${i} << EOF
+quit
+EOF
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: access-http-echo-1
+spec:
+  podSelector:
+    matchLabels:
+      app: http-echo-1
+  ingress:
+  - from: []
+EOF
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: access-http-echo-2
+spec:
+  podSelector:
+    matchLabels:
+      app: http-echo-2
+  ingress:
+  - from: []
+EOF
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  curl -H "Host: http-echo-${i}-1.com" http://${PUBLICIP}:90${i}
+  curl -H "Host: http-echo-${i}-2.com" http://${PUBLICIP}:90${i}
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} delete -f -
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+EOF
 done
 
 # 6. Leverage persistent storage using Portworx
@@ -418,7 +519,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   kubectl --kubeconfig=./config.cluster${i} exec $pod cat /data/out.txt
 done
 
-# 7. Configure Helm
+# 8. Configure Helm
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -452,7 +553,7 @@ done
 ## Sleeping 120 seconds to let the tiller spin up
 sleep 120
 
-# 8. Deploy Istio using Helm
+# 9. Deploy Istio using Helm
 
 curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.6 sh -
 
@@ -468,7 +569,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   --set gateways.istio-ingressgateway.ports[0].nodePort=30000
 done
 
-# 8. Deploy an application on Istio
+# 9. Deploy an application on Istio
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
@@ -484,7 +585,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   curl -I http://${PUBLICIP}:100${i}/productpage
 done
 
-# 9. Enable the metrics_exporter
+# 10. Enable the metrics_exporter
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   sed "s/TOBEREPLACED/${i}/g" scripts/options-kubernetes-metrics-exporter.json.template > scripts/options-kubernetes-update-cluster${i}.json

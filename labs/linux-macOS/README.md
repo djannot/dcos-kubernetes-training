@@ -9,6 +9,7 @@ During this training, you'll learn how to use the main capabilities of Kubernete
 - Upgrade a Kubernetes cluster
 - Expose a Kubernetes Application using a Service Type Load Balancer (L4)
 - Expose a Kubernetes Application using an Ingress (L7)
+- Leverage network policies to restrict access
 - Leverage persistent storage using Portworx
 - Leverage persistent storage using CSI
 - Configure Helm

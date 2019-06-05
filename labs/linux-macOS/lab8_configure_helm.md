@@ -1,4 +1,4 @@
-# Lab 7: Configure Helm
+# Lab 8: Configure Helm
 
 ### Objectives
 - Install helm on your local machine
@@ -55,6 +55,6 @@ Run the following command to install Tiller into your Kubernetes cluster:
 helm --kubeconfig=./config.cluster${CLUSTER} init --service-account tiller
 ```
 
-## Finished with the Lab 7 - Configure Helm
+## Finished with the Lab 8 - Configure Helm
 
-[Move to Lab 8 - Istio](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab8_istio.md)
+[Move to Lab 9 - Istio](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab9_istio.md)

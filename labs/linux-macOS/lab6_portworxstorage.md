@@ -1,4 +1,4 @@
-# Lab 5: Leverage persistent storage using Portworx
+# Lab 6: Leverage persistent storage using Portworx
 Portworx is a Software Defined Software that can use the local storage of the DC/OS nodes to provide High Available persistent storage to both Kubernetes pods and DC/OS services.
 
 ### Objectives
@@ -174,6 +174,6 @@ Delete the Pod using the following command:
 kubectl --kubeconfig=./config.cluster${CLUSTER} delete pod pvpod2
 ```
 
-## Finished with the Lab 5 - Portworx Storage
+## Finished with the Lab 6 - Portworx Storage
 
-[Move to Lab 6 - CSI Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab6_csi_storage.md)
+[Move to Lab 7 - CSI Storage](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab7_csi_storage.md)

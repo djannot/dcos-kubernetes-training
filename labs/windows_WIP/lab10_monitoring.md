@@ -1,4 +1,4 @@
-# Lab 9: Monitoring a Kubernetes Cluster
+# Lab 10: Monitoring a Kubernetes Cluster
 
 ### Objectives
 - Monitoring a Kubernetes Cluster with Grafana (part of the DC/OS Moniroring package)

@@ -1,4 +1,4 @@
-# Lab 6: Leverage persistent storage using CSI
+# Lab 7: Leverage persistent storage using CSI
 The goal of CSI is to establish a standardized mechanism for Container Orchestration Systems (COs) to expose arbitrary storage systems to their containerized workloads. The CSI specification emerged from cooperation between community members from various Container Orchestration Systems (COs)–including Kubernetes, Mesos, Docker, and Cloud Foundry.
 
 ## Set up CSI driver for AWS
@@ -123,6 +123,6 @@ Check the content of the file /data/out.txt and verify that the first timestamp 
 @powershell "$pod = (.\kubectl get pods | findstr ebs-dynamic-app).split(\" \",3)[0]; .\kubectl delete pod $pod
 ```
 
-## Finished with the Lab 6 - CSI Storage
+## Finished with the Lab 7 - CSI Storage
 
-[Move to Lab 7 - Configuring Helm](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab7_configure_helm.md)
+[Move to Lab 8 - Configuring Helm](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/windows_WIP/lab8_configure_helm.md)

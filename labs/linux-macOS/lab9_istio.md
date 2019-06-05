@@ -1,4 +1,4 @@
-# Lab 8: Deploy Istio using Helm and Deploy Applications using Istio
+# Lab 9: Deploy Istio using Helm and Deploy Applications using Istio
 
 ### Objectives
 - Install Istio on your kubernetes cluster using Helm
@@ -220,6 +220,6 @@ You can then follow the other steps described in the Istio documentation to unde
 
 [https://istio.io/docs/examples/bookinfo/](https://istio.io/docs/examples/bookinfo/)
 
-## Finished with the Lab 8 - Istio
+## Finished with the Lab 9 - Istio
 
-[Move to Lab 9 - Monitoring](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab9_monitoring.md)
+[Move to Lab 10 - Monitoring](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab10_monitoring.md)
