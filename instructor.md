@@ -100,7 +100,7 @@ brew install awscli
 
 Run the automated install to get the DC/OS cluster set up with MKE and EdgeLB:
 ```
-./instructor_automated.sh
+./instructor_automated.sh <URL of the DC/OS cluster including https>
 ```
 
 # [Teardown Instructions for once the Lab is Completed](https://github.com/djannot/dcos-kubernetes-training/tree/master/teardown.md)

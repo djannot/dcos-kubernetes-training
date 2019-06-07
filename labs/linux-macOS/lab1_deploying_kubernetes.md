@@ -38,7 +38,7 @@ dcos kubernetes cluster debug plan status deploy --cluster-name=${APPNAME}/prod/
 ```
 
 ## Connect to Kubernetes cluster using kubectl
-Configure the Kubernetes CLI using the following command:
+Configure the Kubernetes CLI using the following command when the deployment is complete:
 ```
 dcos kubernetes cluster kubeconfig --context-name=${APPNAME}-prod-k8s-cluster${CLUSTER} --cluster-name=${APPNAME}/prod/k8s/cluster${CLUSTER} \
     --apiserver-url https://${APPNAME}.prod.k8s.cluster${CLUSTER}.mesos.lab:8443 \

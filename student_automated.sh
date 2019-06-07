@@ -39,7 +39,7 @@ done
 # 3. Upgrade your Kubernetes cluster
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --package-version=2.3.0-1.14.1 --yes
+  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --package-version=2.3.2-1.14.1 --yes
 done
 
 ## DCOS Authentication (not part of the training)

@@ -72,13 +72,11 @@ Note: Ignore the 204/404 and `Does not exist` errors, these are normal.
 
 To see the status of your Kubernetes cluster deployment run:
 ```
-dcos kubernetes cluster kubeconfig --context-name=%APPNAME%-prod-k8s-cluster%CLUSTER% --cluster-name=%APPNAME%/prod/k8s/cluster%CLUSTER% \
-    --apiserver-url https://%APPNAME%.prod.k8s.cluster%CLUSTER%.mesos.lab:8443 \
-    --insecure-skip-tls-verify
+dcos kubernetes cluster debug plan status deploy --cluster-name=%APPNAME%/prod/k8s/cluster%CLUSTER%
 ```
 
 ## Connect to Kubernetes cluster using kubectl
-Configure the Kubernetes CLI using the following command:
+Configure the Kubernetes CLI using the following command when the deployment is complete:
 ```
 dcos kubernetes cluster kubeconfig --context-name=%APPNAME%-prod-k8s-cluster%CLUSTER% --cluster-name=%APPNAME%/prod/k8s/cluster%CLUSTER% \
     --apiserver-url https://%APPNAME%.prod.k8s.cluster%CLUSTER%.mesos.lab:8443 \

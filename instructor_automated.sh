@@ -3,7 +3,7 @@ export APPNAME=training
 export PUBLICIP=3.211.150.99
 export CLUSTER=djannot
 export REGION=us-east-1
-export clusters=3
+export clusters=2
 export maws=110465657741_Mesosphere-PowerUser
 
 #### Remove all DC/OS Clusters
@@ -20,8 +20,7 @@ then
         exit 1
 fi
 
-# For the master change http to https so kubectl setup doesn't break
-MASTER_URL=$(echo $1 | sed 's/http/https/')
+MASTER_URL=$1
 
 #### SETUP CLI
 

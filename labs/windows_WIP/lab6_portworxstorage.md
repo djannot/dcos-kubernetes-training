@@ -6,7 +6,7 @@ To be able to use Portworx persistent storage on your Kubernetes cluster, you ne
 
 ## Deploy Portworx Stork service on your Kubernetes cluster
 ```
-kubectl --kubeconfig=./config.cluster%CLUSTER% apply -f "https://install.portworx.com/2.0?kbver=1.13.3&b=true&dcos=true&stork=true"
+kubectl --kubeconfig=./config.cluster%CLUSTER% apply -f "https://install.portworx.com/2.0?kbver=1.14.1&b=true&dcos=true&stork=true"
 ```
 
 ## Create Kubernetes StorageClass

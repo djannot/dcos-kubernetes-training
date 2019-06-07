@@ -55,7 +55,7 @@ Run the following command to setup the DC/OS CLI:
 dcos cluster setup https://<IP provided by the instructor>
 ```
 
-To validate that you are authenticated to the DC/OS CLI using HTTPS: run:
+To validate that you are authenticated to the DC/OS CLI using https: run:
 ```
 dcos config show core.dcos_url
 ```
