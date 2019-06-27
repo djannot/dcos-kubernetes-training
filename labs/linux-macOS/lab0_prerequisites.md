@@ -110,7 +110,7 @@ sudo apt-get install -y kubectl
 ## Add DNS Hostname to your /etc/hosts or Windows Hosts file for our Labs
 Add the following line to your /etc/hosts (or c:\Windows\System32\Drivers\etc\hosts) file:
 ```
-echo "$PUBLICIP training.prod.k8s.cluster$CLUSTER.mesos.lab" >> /etc/hosts
+echo "$PUBLICIP training.prod.k8s.cluster$CLUSTER.mesos.lab" | sudo tee -a /etc/hosts
 ```
 
 We will be using this hostname translation when connecting to our kubernetes clusters using kubectl
