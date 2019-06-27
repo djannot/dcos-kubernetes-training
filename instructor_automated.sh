@@ -1,6 +1,6 @@
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=3.211.150.99
+export PUBLICIP=54.81.182.214
 export CLUSTER=djannot
 export REGION=us-east-1
 export clusters=2
@@ -46,7 +46,6 @@ sed "s/NODES/${nodes}/g" scripts/options-portworx.json.template > scripts/option
 ./scripts/check-kubernetes-mke-status.sh
 
 ./scripts/deploy-dcos-monitoring.sh
-./scripts/check-status-with-name.sh beta-dcos-monitoring infra/monitoring/dcos-monitoring
 
 ./create-pool-edgelb-all.sh ${clusters}
 ./scripts/deploy-edgelb.sh

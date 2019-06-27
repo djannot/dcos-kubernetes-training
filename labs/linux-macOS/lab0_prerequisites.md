@@ -32,7 +32,7 @@ Log into the DC/OS Kubernetes cluster with the information provided by your inst
 Mac/OS:
 ```
 [ -d /usr/local/bin ] || sudo mkdir -p /usr/local/bin &&
-curl https://downloads.dcos.io/binaries/cli/darwin/x86-64/dcos-1.12/dcos -o dcos &&
+curl https://downloads.dcos.io/binaries/cli/darwin/x86-64/dcos-1.13/dcos -o dcos &&
 sudo mv dcos /usr/local/bin &&
 sudo chmod +x /usr/local/bin/dcos
 ```
@@ -40,7 +40,7 @@ sudo chmod +x /usr/local/bin/dcos
 Linux:
 ```
 [ -d /usr/local/bin ] || sudo mkdir -p /usr/local/bin &&
-curl https://downloads.dcos.io/binaries/cli/linux/x86-64/dcos-1.12/dcos -o dcos &&
+curl https://downloads.dcos.io/binaries/cli/linux/x86-64/dcos-1.13/dcos -o dcos &&
 sudo mv dcos /usr/local/bin &&
 sudo chmod +x /usr/local/bin/dcos
 ```

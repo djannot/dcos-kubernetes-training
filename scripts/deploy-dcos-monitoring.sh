@@ -7,4 +7,4 @@ export ROLE=$(echo ${SERVICEPATH} | sed 's/\//__/g')-role
 ./create-service-account.sh
 ./grant-permissions.sh
 
-dcos package install beta-dcos-monitoring --yes --options=options-dcos-monitoring.json
+dcos package install dcos-monitoring --yes --options=options-dcos-monitoring.json

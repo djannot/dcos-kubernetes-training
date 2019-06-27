@@ -3,5 +3,11 @@
     "name": "infra/monitoring/dcos-monitoring",
     "service_account": "infra-monitoring-dcos-monitoring",
     "service_account_secret": "/infra/monitoring/dcos-monitoring/private-infra-monitoring-dcos-monitoring"
+  },
+  "prometheus": {
+    "mem": 4096
+  },
+  "pushgateway": {
+    "enabled": true
   }
 }
