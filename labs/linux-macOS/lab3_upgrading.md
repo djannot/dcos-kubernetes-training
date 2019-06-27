@@ -54,7 +54,7 @@ deploy (serial strategy) (IN_PROGRESS)
 ## Validate Kubernetes upgrade
 You can validate that the cluster has been updated using kubectl
 ```
-kubectl get nodes
+kubectl --kubeconfig=./config.cluster${CLUSTER} get nodes
 ```
 
 Output should look similar to below:
