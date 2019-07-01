@@ -1,9 +1,9 @@
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=54.81.182.214
+export PUBLICIP=54.198.16.128
 export CLUSTER=djannot
 export REGION=us-east-1
-export clusters=2
+export clusters=50
 export maws=110465657741_Mesosphere-PowerUser
 
 #### Remove all DC/OS Clusters
@@ -50,6 +50,7 @@ sed "s/NODES/${nodes}/g" scripts/options-portworx.json.template > scripts/option
 ./create-pool-edgelb-all.sh ${clusters}
 ./scripts/deploy-edgelb.sh
 ./scripts/check-app-status.sh infra/network/dcos-edgelb/pools/all
+./scripts/create-dklb-secret.sh
 
 sed "/mesos.lab/d" /etc/hosts > ./hosts
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do

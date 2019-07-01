@@ -7,6 +7,24 @@ To expose your applications using running on Kubernetes using L4/L7 we can use D
 dcos package install edgelb --cli --yes
 ```
 
+## Create a secret for the DC/OS Service account
+```
+FOR /F "tokens=* USEBACKQ" %%F IN (`dcos security secrets get /dklb`) DO (
+SET SERVICE_ACCOUNT_SECRET=%%F
+)
+
+set FILE=sa.yml
+>%FILE% echo apiVersion: v1
+>>%FILE% echo kind: Secret
+>>%FILE% echo metadata:
+>>%FILE% echo   name: dklb-dcos-config
+>>%FILE% echo   namespace: kube-system
+>>%FILE% echo type: Opaque
+>>%FILE% echo data:
+>>%FILE% echo   serviceAccountSecret: "%SERVICE_ACCOUNT_SECRET%"
+kubectl --kubeconfig=./config.cluster%CLUSTER% create -f sa.yml
+```
+
 ## Install dklb in your Kubernetes cluster
 First deploy the dklb prerequisites
 ```
@@ -56,9 +74,12 @@ set FILE=edgelb-redis.yml
 >>%FILE% echo kind: Service
 >>%FILE% echo metadata:
 >>%FILE% echo   annotations:
->>%FILE% echo     kubernetes.dcos.io/edgelb-pool-name: "dklb%CLUSTER%"
->>%FILE% echo     kubernetes.dcos.io/edgelb-pool-size: "2"
->>%FILE% echo     kubernetes.dcos.io/edgelb-pool-portmap.6379: "80%CLUSTER%"
+>>%FILE% echo     kubernetes.dcos.io/dklb-config: |
+>>%FILE% echo       name: dklb%CLUSTER%
+>>%FILE% echo       size: 2
+>>%FILE% echo       frontends:
+>>%FILE% echo       - port: 80%CLUSTER%
+>>%FILE% echo         servicePort: 6379
 >>%FILE% echo   labels:
 >>%FILE% echo     app: redis
 >>%FILE% echo   name: redis
@@ -144,9 +165,13 @@ set FILE=ingress.yml
 >>%FILE% echo metadata:
 >>%FILE% echo   annotations:
 >>%FILE% echo     kubernetes.io/ingress.class: edgelb
->>%FILE% echo     kubernetes.dcos.io/edgelb-pool-name: "dklb%CLUSTER%"
->>%FILE% echo     kubernetes.dcos.io/edgelb-pool-size: "2"
->>%FILE% echo     kubernetes.dcos.io/edgelb-pool-port: "90%CLUSTER%"
+>>%FILE% echo     kubernetes.dcos.io/dklb-config: |
+>>%FILE% echo       name: dklb%CLUSTER%
+>>%FILE% echo       size: 2
+>>%FILE% echo       frontends:
+>>%FILE% echo         http:
+>>%FILE% echo           mode: enabled
+>>%FILE% echo           port: 90%CLUSTER%
 >>%FILE% echo   labels:
 >>%FILE% echo     owner: dklb
 >>%FILE% echo   name: dklb-echo
@@ -166,6 +191,15 @@ set FILE=ingress.yml
 >>%FILE% echo           servicePort: 80
 kubectl --kubeconfig=./config.cluster%CLUSTER% create -f ingress.yml
 ```
+
+kubernetes.io/ingress.class: edgelb
+kubernetes.dcos.io/dklb-config: |
+  name: dklb${CLUSTER}
+  size: 2
+  frontends:
+    http:
+      mode: enabled
+      port: 90${CLUSTER}
 
 The dklb EdgeLB pool is automatically updated on DC/OS:
 ```

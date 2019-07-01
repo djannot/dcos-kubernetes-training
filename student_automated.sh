@@ -68,6 +68,21 @@ kubectl --kubeconfig=./config.cluster${i} --token=$(dcos config show core.dcos_a
 
 # 4. Expose a Kubernetes Application using a Service Type Load Balancer (L4)
 
+SERVICE_ACCOUNT_SECRET=$(dcos security secrets get /dklb | awk '{ print $2 }')
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dklb-dcos-config
+  namespace: kube-system
+type: Opaque
+data:
+  serviceAccountSecret: "${SERVICE_ACCOUNT_SECRET}"
+EOF
+done
+
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   kubectl --kubeconfig=./config.cluster${i} create -f scripts/dklb-prereqs.yaml
@@ -101,9 +116,12 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    kubernetes.dcos.io/edgelb-pool-name: "dklb${i}"
-    kubernetes.dcos.io/edgelb-pool-size: "2"
-    kubernetes.dcos.io/edgelb-pool-portmap.6379: "80${i}"
+    kubernetes.dcos.io/dklb-config: |
+      name: dklb${i}
+      size: 2
+      frontends:
+      - port: 80${i}
+        servicePort: 6379
   labels:
     app: redis
   name: redis
@@ -156,9 +174,13 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: edgelb
-    kubernetes.dcos.io/edgelb-pool-name: "dklb${i}"
-    kubernetes.dcos.io/edgelb-pool-size: "2"
-    kubernetes.dcos.io/edgelb-pool-port: "90${i}"
+    kubernetes.dcos.io/dklb-config: |
+      name: dklb${i}
+      size: 2
+      frontends:
+        http:
+          mode: enabled
+          port: 90${i}
   labels:
     owner: dklb${i}
   name: dklb-echo
@@ -553,20 +575,15 @@ done
 ## Sleeping 120 seconds to let the tiller spin up
 sleep 120
 
-# 9. Deploy Istio using Helm
-
-curl -L https://git.io/getLatestIstio | ISTIO_VERSION=1.0.6 sh -
+# 9. Deploy Istio using Helm templates
 
 export PATH=$PWD/istio-1.0.6/bin:$PATH
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
-  helm --kubeconfig=./config.cluster${i} install istio-1.0.6/install/kubernetes/helm/istio --name istio --namespace istio-system \
-  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-name"=dklb${i} \
-  --set gateways.istio-ingressgateway.serviceAnnotations."kubernetes\.dcos\.io/edgelb-pool-size"=\"2\" \
-  --set gateways.istio-ingressgateway.ports[0].port=100${i} \
-  --set gateways.istio-ingressgateway.ports[0].targetPort=80 \
-  --set gateways.istio-ingressgateway.ports[0].name=http2 \
-  --set gateways.istio-ingressgateway.ports[0].nodePort=30000
+  kubectl --kubeconfig=./config.cluster${i} create namespace istio-system
+  helm template student/istio-1.2.2/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system | kubectl --kubeconfig=./config.cluster${i} apply -f -
+  sed "s/\${CLUSTER}/${i}/" student/istio.yaml.template > student/istio.yaml
+  kubectl --kubeconfig=./config.cluster${CLUSTER} create -f student/istio.yaml
 done
 
 # 9. Deploy an application on Istio

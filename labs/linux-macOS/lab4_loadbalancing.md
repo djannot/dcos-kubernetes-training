@@ -14,6 +14,22 @@ Exposing your application on a kubernetes cluster in an Enterprise-grade environ
 dcos package install edgelb --cli --yes
 ```
 
+## Create a secret for the DC/OS Service account
+```
+SERVICE_ACCOUNT_SECRET=$(dcos security secrets get /dklb | awk '{ print $2 }')
+
+cat <<EOF | kubectl --kubeconfig=./config.cluster${CLUSTER} create -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dklb-dcos-config
+  namespace: kube-system
+type: Opaque
+data:
+  serviceAccountSecret: "${SERVICE_ACCOUNT_SECRET}"
+EOF
+```
+
 ## Install dklb in your Kubernetes cluster
 First deploy the dklb prerequisites
 ```
@@ -63,9 +79,12 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-    kubernetes.dcos.io/edgelb-pool-name: "dklb${CLUSTER}"
-    kubernetes.dcos.io/edgelb-pool-size: "2"
-    kubernetes.dcos.io/edgelb-pool-portmap.6379: "80${CLUSTER}"
+    kubernetes.dcos.io/dklb-config: |
+      name: dklb${CLUSTER}
+      size: 2
+      frontends:
+      - port: 80${CLUSTER}
+        servicePort: 6379
   labels:
     app: redis
   name: redis
@@ -143,9 +162,13 @@ kind: Ingress
 metadata:
   annotations:
     kubernetes.io/ingress.class: edgelb
-    kubernetes.dcos.io/edgelb-pool-name: "dklb${CLUSTER}"
-    kubernetes.dcos.io/edgelb-pool-size: "2"
-    kubernetes.dcos.io/edgelb-pool-port: "90${CLUSTER}"
+    kubernetes.dcos.io/dklb-config: |
+      name: dklb${CLUSTER}
+      size: 2
+      frontends:
+        http:
+          mode: enabled
+          port: 90${CLUSTER}
   labels:
     owner: dklb
   name: dklb-echo
