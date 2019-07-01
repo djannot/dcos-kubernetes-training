@@ -53,7 +53,7 @@ Navigate to the UI --> services --> infra --> monitoring and click on the small 
 
 ![Monitoring - Grafana UI](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab9_2.png)
 
-Select the Kubernetes: Cluster Health dashboard and then your Kubernetes cluster.
+Under the DC/OS Defaults folder, select the Kubernetes: Cluster Health dashboard and then your Kubernetes cluster.
 
 ![Monitoring - Cluster Health dashboard](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab9_3.png)
 
