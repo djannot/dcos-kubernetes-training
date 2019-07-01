@@ -6,8 +6,6 @@ At a high level, Istio helps reduce the complexity of these deployments, and eas
 You can download/explore the latest releases using the URL below:
 [https://github.com/istio/istio/releases](https://github.com/istio/istio/releases)
 
-
-
 # Currently Work in Progress
 
 Unfortunately this guide does not currently provide instructions on how to deploy Istio on Windows workstations. Please pair with a neighbour that has a Linux workstation to complete this lab

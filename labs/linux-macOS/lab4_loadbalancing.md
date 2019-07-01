@@ -209,6 +209,87 @@ curl -H "Host: http-echo-${CLUSTER}-1.com" http://${PUBLICIP}:90${CLUSTER}
 curl -H "Host: http-echo-${CLUSTER}-2.com" http://${PUBLICIP}:90${CLUSTER}
 ```
 
+## Create and Ingress service to expose the hello-world pods using L7 and TLS
+
+First of all, delete the current ingress:
+```
+kubectl --kubeconfig=./config.cluster${CLUSTER} delete ingress dklb-echo
+```
+
+Create signed certificates:
+```
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout http-echo-1-tls.key -out http-echo-1-tls.crt -subj "/CN=http-echo-1.com"
+kubectl --kubeconfig=./config.cluster${CLUSTER} create secret tls http-echo-1 --key http-echo-1-tls.key --cert http-echo-1-tls.crt
+
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout http-echo-2-tls.key -out http-echo-2-tls.crt -subj "/CN=http-echo-2.com"
+kubectl --kubeconfig=./config.cluster${CLUSTER} create secret tls http-echo-2 --key http-echo-2-tls.key --cert http-echo-2-tls.crt
+```
+
+Finally create the Ingress to expose the application to the outside world using the following command:
+
+```
+cat <<EOF | kubectl --kubeconfig=./config.cluster${CLUSTER} create -f -
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: edgelb
+    kubernetes.dcos.io/dklb-config: |
+      name: dklb${CLUSTER}
+      size: 2
+      frontends:
+        http:
+          mode: enabled
+          port: 90${CLUSTER}
+        https:
+          port: 91${CLUSTER}
+  labels:
+    owner: dklb
+  name: dklb-echo
+spec:
+  tls:
+  - hosts:
+    - http-echo-${CLUSTER}-1.com
+    secretName: http-echo-1
+  - hosts:
+    - http-echo-${CLUSTER}-2.com
+    secretName: http-echo-2
+  rules:
+  - host: "http-echo-${CLUSTER}-1.com"
+    http:
+      paths:
+      - backend:
+          serviceName: http-echo-1
+          servicePort: 80
+  - host: "http-echo-${CLUSTER}-2.com"
+    http:
+      paths:
+      - backend:
+          serviceName: http-echo-2
+          servicePort: 80
+EOF
+```
+
+The dklb EdgeLB pool is automatically updated on DC/OS:
+```
+dcos edgelb list
+```
+
+Output should look like below:
+```
+$ dcos edgelb list
+  NAME    APIVERSION  COUNT  ROLE          PORTS
+  all     V2          2      slave_public  9091, 8443
+  dklb01  V2          2      slave_public  0, 8001, 9001, 9101
+  ```
+
+## Validate Ingress connection
+You can validate that you can access the web application PODs from your laptop using the following commands:
+```
+curl -k --resolve http-echo-${CLUSTER}-1.com:91${CLUSTER}:${PUBLICIP} https://http-echo-${CLUSTER}-1.com:91${CLUSTER}
+curl -k --resolve http-echo-${CLUSTER}-2.com:91${CLUSTER}:${PUBLICIP} https://http-echo-${CLUSTER}-2.com:91${CLUSTER}
+```
+
 ## Finished with the Lab 4 - Load Balancing
 
 [Move to Lab 5 - Network policies](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab5_networkpolicies.md)

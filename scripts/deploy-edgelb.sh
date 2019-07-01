@@ -25,6 +25,7 @@ dcos security org users grant ${serviceaccount} dcos:mesos:master:task:user:root
 dcos security org users grant ${serviceaccount} dcos:mesos:master:task:app_id full
 dcos security org users grant ${serviceaccount} dcos:adminrouter:service:${path}/pools/all full
 dcos security org users grant ${serviceaccount} dcos:adminrouter:service:${path}/pools/dklb full
+dcos security org users grant ${serviceaccount} dcos:adminrouter:service:${path}/pools/dklb01 full
 
 #dcos security org users grant ${serviceaccount} dcos:superuser full
 #dcos security org users grant ${serviceaccount} dcos:secrets:list:default:/${path}/pools/* full

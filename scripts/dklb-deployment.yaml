@@ -37,7 +37,7 @@ spec:
       priorityClassName: system-node-critical
       containers:
       - name: dklb
-        image: mesosphere/dklb:v0.1.0-alpha.8
+        image: mesosphere/dklb:v0.1.0-alpha.11
         imagePullPolicy: Always
         args:
         - /dklb
@@ -85,6 +85,11 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        - name: SERVICE_ACCOUNT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: dklb-dcos-config
+              key: serviceAccountSecret
         resources:
           requests:
             memory: "64Mi"
