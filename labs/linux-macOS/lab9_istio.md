@@ -23,7 +23,7 @@ helm template istio-1.2.2/install/kubernetes/helm/istio-init --name istio-init -
 helm template istio-1.2.2/install/kubernetes/helm/istio --name istio --namespace istio-system > istio.yaml
 ```
 
-Edit the `istio.yaml` file to add the annotations to the istio-ingressgateway Service definition, at line 1761:
+Edit the `istio.yaml` file to add the annotations to the istio-ingressgateway Service definition, as follows:
 
 ```
 ...
