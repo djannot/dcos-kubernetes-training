@@ -1,9 +1,9 @@
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=54.161.120.243
+export PUBLICIP=3.92.240.178
 export CLUSTER=djannot
 export REGION=us-east-1
-export clusters=75
+export clusters=30
 export maws=110465657741_Mesosphere-PowerUser
 
 #### Remove all DC/OS Clusters

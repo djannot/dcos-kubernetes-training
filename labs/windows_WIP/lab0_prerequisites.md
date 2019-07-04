@@ -1,4 +1,4 @@
-Mosy of the students have issues with the Windows instructions because they don't have admin rights on their Windows laptop.
+Most of the students have issues with the Windows instructions because they don't have admin rights on their Windows laptop.
 
 So, we recommend using the [Google Cloud Shell](https://console.cloud.google.com/cloudshell) and following the [instructions for Linux](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab0_prerequisites.md).
 
