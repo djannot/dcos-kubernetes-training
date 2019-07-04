@@ -1,27 +1,13 @@
+Mosy of the students have issues with the Windows instructions because they don't have admin rights on their Windows laptop.
+
+So, we recommend using the [Google Cloud Shell](https://console.cloud.google.com/cloudshell) and following the [instructions for Linux](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab0_prerequisites.md).
+
 # Pre-requisites
 
 ## Change Directory
 To start your labs, cd into the `student` directory
 ```
 cd student
-```
-
-## Clear all DC/OS Clusters, If Any, from your Local Machine
-```
-rm -rf ~/.dcos/clusters
-```
-
-Optional: You can also move the directory to /tmp/dcos-clusters as backup:
-```
-sudo mkdir /tmp/dcos-clusters
-sudo mv ~/.dcos/clusters/* /tmp/dcos-clusters 2> /dev/null
-sudo mv ~/.dcos/dcos.toml /tmp/dcos-clusters 2> /dev/null
-sudo rm -rf ~/.dcos 2> /dev/null
-```
-
-## Move Existing Kube Config File, If Any, to an alternate file name
-```
-mv ~/.kube/config ~/.kube/config.ori
 ```
 
 ## Access the DC/OS UI

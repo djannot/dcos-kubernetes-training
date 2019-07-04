@@ -45,10 +45,6 @@ sudo mv dcos /usr/local/bin &&
 sudo chmod +x /usr/local/bin/dcos
 ```
 
-Windows:
-Follow the instructions located in the top-right dropdown to install the DC/OS CLI on a Windows machine
-![Install Windows CLI](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab0_1.png)
-
 ## Set up DC/OS CLI Using HTTPS (required by Kubernetes)
 Run the following command to setup the DC/OS CLI:
 ```
@@ -91,11 +87,6 @@ Install the kubectl CLI using the instructions available at the URL below:
 Using Brew on MacOS:
 ```
 brew install kubernetes-cli
-```
-
-Using Choco on Windows:
-```
-choco install kubernetes-cli
 ```
 
 Using CentOS / RHEL / Fedora:

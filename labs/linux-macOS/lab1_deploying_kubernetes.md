@@ -79,6 +79,16 @@ Login using the config file.
 
 ![Kubernetes dashboard](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab1_1.png)
 
+>If you are using the Google Cloud Shell, click on icon with the 3 dots on the top right corner and click on `Download file`.
+
+>Indicate the path of the config file (`/home/<your user>/config`) and download it.
+
+>Then, click on the `Web preview` icon on the top right corner and change the port to `8001`.
+
+>Finally, click on the `Web preview` icon again and select `Preview on port 8001`.
+
+>It will open a new tab. Keep the hostname and append `/api/v1/namespaces/kube-system/services/https:kubernetes-dashboard:/proxy/` to it.
+
 ## Finished with the Lab 1 - Deploying Kubernetes
 
 [Move to Lab 2 - Scaling](https://github.com/djannot/dcos-kubernetes-training/blob/master/labs/linux-macOS/lab2_scaling.md)

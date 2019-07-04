@@ -33,7 +33,7 @@ data "http" "whatismyip" {
 module "dcos" {
   #source  = "dcos-terraform/dcos/aws"
   source  = "git::ssh://git@github.com/dcos-terraform/terraform-aws-dcos?ref=release/v0.2"
-  custom_dcos_download_path = "http://downloads.mesosphere.com/dcos-enterprise/stable/1.13.0/dcos_generate_config.ee.sh"
+  custom_dcos_download_path = "http://downloads.mesosphere.com/dcos-enterprise/stable/1.13.2/dcos_generate_config.ee.sh"
   version = "~> 0.2.0"
 
   providers = {
@@ -51,7 +51,7 @@ module "dcos" {
   num_private_agents = "25"
   num_public_agents  = "2"
 
-  dcos_version = "1.13.0"
+  dcos_version = "1.13.2"
 
   dcos_variant              = "ee"
   dcos_license_key_contents = "${file("./license.txt")}"
