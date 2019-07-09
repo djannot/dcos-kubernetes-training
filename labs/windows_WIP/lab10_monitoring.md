@@ -20,6 +20,7 @@ Edit the options-kubernetes-cluster${CLUSTER}.json file to set add the metrics_e
     "high_availability": false,
     "private_node_count": 3,
     "private_reserved_resources": {
+      "kube_cpus": 4,
       "kube_mem": 4096
     },
     "metrics_exporter": {

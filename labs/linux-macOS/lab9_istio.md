@@ -16,44 +16,21 @@ You can download/explore the latest releases using the URL below:
 ## Install Istio using Helm
 For our labs today we will be using Istio 1.2.2 which already exists in the `student` directory to save time
 
-Run the following commands to go to install the prerequisites and to create the isntallation template with Helm:
+Run the following commands to go to install the prerequisites:
 ```
+export PATH=$PWD/istio-1.2.2/bin:$PATH
 kubectl --kubeconfig=./config.cluster${CLUSTER} create namespace istio-system
 helm template istio-1.2.2/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system | kubectl --kubeconfig=./config.cluster${CLUSTER} apply -f -
-helm template istio-1.2.2/install/kubernetes/helm/istio --name istio --namespace istio-system > istio.yaml
 ```
 
-Edit the `istio.yaml` file to add the annotations to the istio-ingressgateway Service definition, as follows:
-
+Wait until the following command returns 23:
 ```
-...
-apiVersion: v1
-kind: Service
-metadata:
-  name: istio-ingressgateway
-  namespace: istio-system
-  annotations:
-    kubernetes.dcos.io/dklb-config: |
-      name: dklb${CLUSTER}
-      size: 2
-      frontends:
-      - port: 100${CLUSTER}
-        servicePort: 80
-  labels:
-    chart: gateways
-    heritage: Tiller
-    release: istio
-    app: istio-ingressgateway
-    istio: ingressgateway
-spec:
-  type: LoadBalancer
-...
+kubectl --kubeconfig=./config.cluster${CLUSTER} get crds | grep 'istio.io\|certmanager.k8s.io' | wc -l
 ```
-
-Don't forget to replace `${CLUSTER}` by the value of the variable
 
 Now, you can deploy Istio from the template:
 ```
+sed "s/\${CLUSTER}/${CLUSTER}/" istio.yaml.template > istio.yaml
 kubectl --kubeconfig=./config.cluster${CLUSTER} create -f istio.yaml
 ```
 

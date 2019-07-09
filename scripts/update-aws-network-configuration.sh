@@ -14,3 +14,11 @@ aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} 
 aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=9001-90$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0
 aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=9101-91$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0
 aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=10001-100$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0
+aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=10101-101$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0
+aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=10201-102$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0
+aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=10301-103$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0
+aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=10401-104$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0
+aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=10501-105$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0
+aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=10601-106$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0
+aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=10701-107$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0
+aws --region=${REGION} ec2 authorize-security-group-ingress --group-id=${group} --protocol=tcp --port=10801-108$(echo ${clusters} | awk '{printf("%02d\n", $0)}') --cidr=0.0.0.0/0

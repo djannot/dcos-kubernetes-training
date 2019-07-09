@@ -47,8 +47,8 @@ module "dcos" {
   admin_ips           = ["0.0.0.0/0"]
 
   num_masters        = "1"
-  # 25 private agents for 50 Kubernetes clusters
-  num_private_agents = "25"
+  # 30 private agents for 50 Kubernetes clusters
+  num_private_agents = "30"
   num_public_agents  = "2"
 
   dcos_version = "1.13.2"

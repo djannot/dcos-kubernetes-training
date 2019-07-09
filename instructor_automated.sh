@@ -1,9 +1,9 @@
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=3.92.240.178
+export PUBLICIP=54.224.9.22
 export CLUSTER=djannot
 export REGION=us-east-1
-export clusters=30
+export clusters=20
 export maws=110465657741_Mesosphere-PowerUser
 
 #### Remove all DC/OS Clusters
@@ -35,7 +35,7 @@ group=$(aws --region=$REGION ec2 describe-instances |  jq --raw-output ".Reserva
 ./scripts/create-csi-iam-policy.sh ${maws}
 ./scripts/update-aws-network-configuration.sh ${clusters} ${loadbalancer} ${group} ${maws}
 
-dcos package install --yes --cli dcos-enterprise-cli
+#dcos package install --yes --cli dcos-enterprise-cli
 
 nodes=$(dcos node --json | jq --raw-output ".[] | select((.type | test(\"agent\")) and (.attributes.public_ip == null)) | .id" | wc -l | awk '{ print $1 }')
 sed "s/NODES/${nodes}/g" scripts/options-portworx.json.template > scripts/options-portworx.json
@@ -49,6 +49,11 @@ sed "s/NODES/${nodes}/g" scripts/options-portworx.json.template > scripts/option
 
 ./create-pool-edgelb-all.sh ${clusters}
 ./scripts/deploy-edgelb.sh
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  dcos security org users grant infra-network-dcos-edgelb dcos:adminrouter:service:infra/network/dcos-edgelb/pools/dklb${i} full
+done
+
 ./scripts/check-app-status.sh infra/network/dcos-edgelb/pools/all
 ./scripts/create-dklb-secret.sh
 

@@ -1,9 +1,9 @@
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=54.162.3.167
+export PUBLICIP=54.224.9.22
 export CLUSTER=djannot
 export REGION=us-east-1
-export clusters=2
+export clusters=20
 
 # 1. Deploy a Kubernetes cluster
 
@@ -33,13 +33,21 @@ fi
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   sed "s/TOBEREPLACED/${i}/g" scripts/options-kubernetes-update-cluster.json.template > scripts/options-kubernetes-update-cluster${i}.json
-  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --options=scripts/options-kubernetes-update-cluster${i}.json --yes
+  dcos kubernetes cluster update --timeout=1s --cluster-name=training/prod/k8s/cluster${i} --options=scripts/options-kubernetes-update-cluster${i}.json --yes
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  ./scripts/check-kubernetes-cluster-status.sh ${APPNAME}/prod/k8s/cluster${i}
 done
 
 # 3. Upgrade your Kubernetes cluster
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --package-version=2.3.2-1.14.1 --yes
+  dcos kubernetes cluster update --timeout=1s --cluster-name=training/prod/k8s/cluster${i} --package-version=2.3.3-1.14.3 --yes
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  ./scripts/check-kubernetes-cluster-status.sh ${APPNAME}/prod/k8s/cluster${i}
 done
 
 ## DCOS Authentication (not part of the training)
@@ -166,7 +174,7 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   kubectl --kubeconfig=./config.cluster${i} expose pod http-echo-2 --port 80 --target-port 80 --type NodePort --name "http-echo-2"
 done
 
-awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+awk -v clusters=${clusters} 'BEGIN { for (i=11; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
 apiVersion: extensions/v1beta1
@@ -199,6 +207,7 @@ spec:
           serviceName: http-echo-2
           servicePort: 80
 EOF
+sleep 3
 done
 
 sleep 30
@@ -207,6 +216,69 @@ awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n"
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   curl -H "Host: http-echo-${i}-1.com" http://${PUBLICIP}:90${i}
   curl -H "Host: http-echo-${i}-2.com" http://${PUBLICIP}:90${i}
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  kubectl --kubeconfig=./config.cluster${i} delete ingress dklb-echo
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout http-echo-${i}-1-tls.key -out http-echo-${i}-1-tls.crt -subj "/CN=http-echo-${i}-1.com"
+  kubectl --kubeconfig=./config.cluster${i} create secret tls http-echo-${i}-1 --key http-echo-${i}-1-tls.key --cert http-echo-${i}-1-tls.crt
+  openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout http-echo-${i}-2-tls.key -out http-echo-${i}-2-tls.crt -subj "/CN=http-echo-${i}-2.com"
+  kubectl --kubeconfig=./config.cluster${i} create secret tls http-echo-${i}-2 --key http-echo-${i}-2-tls.key --cert http-echo-${i}-2-tls.crt
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  cat <<EOF | kubectl --kubeconfig=./config.cluster${i} create -f -
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: edgelb
+    kubernetes.dcos.io/dklb-config: |
+      name: dklb${i}
+      size: 2
+      frontends:
+        http:
+          mode: enabled
+          port: 90${i}
+        https:
+          port: 91${i}
+  labels:
+    owner: dklb${i}
+  name: dklb-echo
+spec:
+  tls:
+  - hosts:
+    - http-echo-${i}-1.com
+    secretName: http-echo-${i}-1
+  - hosts:
+    - http-echo-${i}-2.com
+    secretName: http-echo-${i}-2
+  rules:
+  - host: "http-echo-${i}-1.com"
+    http:
+      paths:
+      - backend:
+          serviceName: http-echo-1
+          servicePort: 80
+  - host: "http-echo-${i}-2.com"
+    http:
+      paths:
+      - backend:
+          serviceName: http-echo-2
+          servicePort: 80
+EOF
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
+  curl -k --resolve http-echo-${i}-1.com:91${i}:${PUBLICIP} https://http-echo-${i}-1.com:91${i}
+  curl -k --resolve http-echo-${i}-2.com:91${i}:${PUBLICIP} https://http-echo-${i}-2.com:91${i}
 done
 
 # 5. Leverage network policies to restrict access
@@ -577,21 +649,26 @@ sleep 120
 
 # 9. Deploy Istio using Helm templates
 
-export PATH=$PWD/istio-1.0.6/bin:$PATH
+export PATH=$PWD/student/istio-1.2.2/bin:$PATH
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   kubectl --kubeconfig=./config.cluster${i} create namespace istio-system
   helm template student/istio-1.2.2/install/kubernetes/helm/istio-init --name istio-init --namespace istio-system | kubectl --kubeconfig=./config.cluster${i} apply -f -
+done
+
+export PATH=$PWD/student/istio-1.2.2/bin:$PATH
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
   sed "s/\${CLUSTER}/${i}/" student/istio.yaml.template > student/istio.yaml
-  kubectl --kubeconfig=./config.cluster${CLUSTER} create -f student/istio.yaml
+  kubectl --kubeconfig=./config.cluster${i} create -f student/istio.yaml
 done
 
 # 9. Deploy an application on Istio
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   echo "Kubernetes cluster training/prod/k8s/cluster${i}:"
-  kubectl --kubeconfig=./config.cluster${i} apply -f <(istioctl --kubeconfig=./config.cluster${i} kube-inject -f istio-1.0.6/samples/bookinfo/platform/kube/bookinfo.yaml)
-  kubectl --kubeconfig=./config.cluster${i} apply -f istio-1.0.6/samples/bookinfo/networking/bookinfo-gateway.yaml
+  kubectl --kubeconfig=./config.cluster${i} apply -f <(istioctl --kubeconfig=./config.cluster${i} kube-inject -f student/istio-1.2.2/samples/bookinfo/platform/kube/bookinfo.yaml)
+  kubectl --kubeconfig=./config.cluster${i} apply -f student/istio-1.2.2/samples/bookinfo/networking/bookinfo-gateway.yaml
 done
 
 ## Sleeping 30 seconds to let the Istio application spin up
@@ -606,5 +683,9 @@ done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
   sed "s/TOBEREPLACED/${i}/g" scripts/options-kubernetes-metrics-exporter.json.template > scripts/options-kubernetes-update-cluster${i}.json
-  dcos kubernetes cluster update --cluster-name=training/prod/k8s/cluster${i} --options=scripts/options-kubernetes-update-cluster${i}.json --yes
+  dcos kubernetes cluster update --timeout=1s --cluster-name=training/prod/k8s/cluster${i} --options=scripts/options-kubernetes-update-cluster${i}.json --yes
+done
+
+awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
+  ./scripts/check-kubernetes-cluster-status.sh ${APPNAME}/prod/k8s/cluster${i}
 done

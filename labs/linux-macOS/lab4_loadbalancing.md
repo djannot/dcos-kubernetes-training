@@ -106,16 +106,34 @@ kubectl --kubeconfig=./config.cluster${CLUSTER} get services
 
 A dklb EdgeLB pool is automatically created on DC/OS:
 ```
-dcos edgelb list
+dcos edgelb show dklb${CLUSTER}
 ```
 
 Output should look similar to below:
 ```
-$ dcos edgelb list
-  NAME    APIVERSION  COUNT  ROLE          PORTS
-  all     V2          2      slave_public  9091, 8443
-  dklb01  V2          2      slave_public  0, 8001
-  ```
+Summary:
+  NAME         dklb01           
+  APIVERSION   V2               
+  COUNT        2                
+  ROLE         slave_public     
+  CONSTRAINTS  hostname:UNIQUE  
+  STATSPORT    0                
+
+Frontends:
+  NAME                                            PORT  PROTOCOL  
+  training.prod.k8s.cluster01:default:redis:6379  8001  TCP       
+
+Backends:
+  FRONTEND                                        NAME                                            PROTOCOL  BALANCE    
+  training.prod.k8s.cluster01:default:redis:6379  training.prod.k8s.cluster01:default:redis:6379  TCP       leastconn  
+
+Marathon Services:
+  BACKEND  TYPE  SERVICE  CONTAINER  PORT  CHECK  
+
+Mesos Services:
+  BACKEND                                         TYPE          FRAMEWORK                    TASK            PORT   CHECK    
+  training.prod.k8s.cluster01:default:redis:6379  CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  30898  enabled
+```
 
 You can also see pools being dynamically created in the UI:
 ![dklb pool](https://github.com/djannot/dcos-kubernetes-training/blob/master/images/lab4_2.png)
@@ -191,16 +209,44 @@ EOF
 
 The dklb EdgeLB pool is automatically updated on DC/OS:
 ```
-dcos edgelb list
+dcos edgelb show dklb${CLUSTER}
 ```
 
 Output should look like below:
 ```
-$ dcos edgelb list
-  NAME    APIVERSION  COUNT  ROLE          PORTS
-  all     V2          2      slave_public  9091, 8443
-  dklb01  V2          2      slave_public  0, 8001, 9001
-  ```
+Summary:
+  NAME         dklb01           
+  APIVERSION   V2               
+  COUNT        2                
+  ROLE         slave_public     
+  CONSTRAINTS  hostname:UNIQUE  
+  STATSPORT    0                
+
+Frontends:
+  NAME                                                PORT  PROTOCOL  
+  training.prod.k8s.cluster01:default:dklb-echo:http  9001  HTTP      
+  training.prod.k8s.cluster01:default:redis:6379      8001  TCP       
+
+Backends:
+  FRONTEND                                            NAME                                                             PROTOCOL  BALANCE    
+  training.prod.k8s.cluster01:default:redis:6379      training.prod.k8s.cluster01:default:redis:6379                   TCP       leastconn  
+  training.prod.k8s.cluster01:default:dklb-echo:http  training.prod.k8s.cluster01:default:dklb-echo:default-backend:0  HTTP      leastconn  
+  training.prod.k8s.cluster01:default:dklb-echo:http  training.prod.k8s.cluster01:default:dklb-echo:http-echo-1:80     HTTP      leastconn  
+  training.prod.k8s.cluster01:default:dklb-echo:http  training.prod.k8s.cluster01:default:dklb-echo:http-echo-2:80     HTTP      leastconn  
+
+Marathon Services:
+  BACKEND  TYPE  SERVICE  CONTAINER  PORT  CHECK  
+
+Mesos Services:
+  BACKEND                                                          TYPE          FRAMEWORK                    TASK            PORT   CHECK    
+  training.prod.k8s.cluster01:default:redis:6379                   CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  30898  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:default-backend:0  CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  31317  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:default-backend:0  CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  31317  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:http-echo-1:80     CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  30995  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:http-echo-1:80     CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  30995  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:http-echo-2:80     CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  32006  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:http-echo-2:80     CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  32006  enabled
+```
 
 ## Validate Ingress connection
 You can validate that you can access the web application PODs from your laptop using the following commands:
@@ -218,11 +264,11 @@ kubectl --kubeconfig=./config.cluster${CLUSTER} delete ingress dklb-echo
 
 Create signed certificates:
 ```
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout http-echo-1-tls.key -out http-echo-1-tls.crt -subj "/CN=http-echo-1.com"
-kubectl --kubeconfig=./config.cluster${CLUSTER} create secret tls http-echo-1 --key http-echo-1-tls.key --cert http-echo-1-tls.crt
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout http-echo-${CLUSTER}-1-tls.key -out http-echo-${CLUSTER}-1-tls.crt -subj "/CN=http-echo-${CLUSTER}-1.com"
+kubectl --kubeconfig=./config.cluster${CLUSTER} create secret tls http-echo-${CLUSTER}-1 --key http-echo-${CLUSTER}-1-tls.key --cert http-echo-${CLUSTER}-1-tls.crt
 
-openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout http-echo-2-tls.key -out http-echo-2-tls.crt -subj "/CN=http-echo-2.com"
-kubectl --kubeconfig=./config.cluster${CLUSTER} create secret tls http-echo-2 --key http-echo-2-tls.key --cert http-echo-2-tls.crt
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout http-echo-${CLUSTER}-2-tls.key -out http-echo-${CLUSTER}-2-tls.crt -subj "/CN=http-echo-${CLUSTER}-2.com"
+kubectl --kubeconfig=./config.cluster${CLUSTER} create secret tls http-echo-${CLUSTER}-2 --key http-echo-${CLUSTER}-2-tls.key --cert http-echo-${CLUSTER}-2-tls.crt
 ```
 
 Finally create the Ingress to expose the application to the outside world using the following command:
@@ -250,10 +296,10 @@ spec:
   tls:
   - hosts:
     - http-echo-${CLUSTER}-1.com
-    secretName: http-echo-1
+    secretName: http-echo-${CLUSTER}-1
   - hosts:
     - http-echo-${CLUSTER}-2.com
-    secretName: http-echo-2
+    secretName: http-echo-${CLUSTER}-2
   rules:
   - host: "http-echo-${CLUSTER}-1.com"
     http:
@@ -272,16 +318,45 @@ EOF
 
 The dklb EdgeLB pool is automatically updated on DC/OS:
 ```
-dcos edgelb list
+dcos edgelb show dklb${CLUSTER}
 ```
 
 Output should look like below:
 ```
-$ dcos edgelb list
-  NAME    APIVERSION  COUNT  ROLE          PORTS
-  all     V2          2      slave_public  9091, 8443
-  dklb01  V2          2      slave_public  0, 8001, 9001, 9101
-  ```
+Summary:
+  NAME         dklb01           
+  APIVERSION   V2               
+  COUNT        2                
+  ROLE         slave_public     
+  CONSTRAINTS  hostname:UNIQUE  
+  STATSPORT    0                
+
+Frontends:
+  NAME                                                 PORT  PROTOCOL  
+  training.prod.k8s.cluster01:default:dklb-echo:http   9001  HTTP      
+  training.prod.k8s.cluster01:default:dklb-echo:https  9101  HTTPS     
+  training.prod.k8s.cluster01:default:redis:6379       8001  TCP       
+
+Backends:
+  FRONTEND                                            NAME                                                             PROTOCOL  BALANCE    
+  training.prod.k8s.cluster01:default:redis:6379      training.prod.k8s.cluster01:default:redis:6379                   TCP       leastconn  
+  training.prod.k8s.cluster01:default:dklb-echo:http  training.prod.k8s.cluster01:default:dklb-echo:default-backend:0  HTTP      leastconn  
+  training.prod.k8s.cluster01:default:dklb-echo:http  training.prod.k8s.cluster01:default:dklb-echo:http-echo-1:80     HTTP      leastconn  
+  training.prod.k8s.cluster01:default:dklb-echo:http  training.prod.k8s.cluster01:default:dklb-echo:http-echo-2:80     HTTP      leastconn  
+
+Marathon Services:
+  BACKEND  TYPE  SERVICE  CONTAINER  PORT  CHECK  
+
+Mesos Services:
+  BACKEND                                                          TYPE          FRAMEWORK                    TASK            PORT   CHECK    
+  training.prod.k8s.cluster01:default:redis:6379                   CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  30898  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:default-backend:0  CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  31317  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:default-backend:0  CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  31317  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:http-echo-1:80     CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  30995  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:http-echo-1:80     CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  30995  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:http-echo-2:80     CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  32006  enabled  
+  training.prod.k8s.cluster01:default:dklb-echo:http-echo-2:80     CONTAINER_IP  training/prod/k8s/cluster01  ^kube-node-.*$  32006  enabled
+```
 
 ## Validate Ingress connection
 You can validate that you can access the web application PODs from your laptop using the following commands:

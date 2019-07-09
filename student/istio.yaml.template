@@ -1764,6 +1764,22 @@ metadata:
       frontends:
       - port: 100${CLUSTER}
         servicePort: 80
+      - port: 101${CLUSTER}
+        servicePort: 15020
+      - port: 102${CLUSTER}
+        servicePort: 443
+      - port: 103${CLUSTER}
+        servicePort: 31400
+      - port: 104${CLUSTER}
+        servicePort: 15029
+      - port: 105${CLUSTER}
+        servicePort: 15030
+      - port: 106${CLUSTER}
+        servicePort: 15031
+      - port: 107${CLUSTER}
+        servicePort: 15032
+      - port: 108${CLUSTER}
+        servicePort: 15443
   labels:
     chart: gateways
     heritage: Tiller
