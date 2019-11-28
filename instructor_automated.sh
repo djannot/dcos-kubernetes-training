@@ -51,7 +51,7 @@ sed "s/NODES/${nodes}/g" scripts/options-portworx.json.template > scripts/option
 ./scripts/deploy-edgelb.sh
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  dcos security org users grant infra-network-dcos-edgelb dcos:adminrouter:service:infra/network/dcos-edgelb/pools/dklb${i} full
+  dcos security org users grant dcos-edgelb dcos:adminrouter:service:edgelb/pools/dklb${i} full
 done
 
 ./scripts/check-app-status.sh infra/network/dcos-edgelb/pools/all

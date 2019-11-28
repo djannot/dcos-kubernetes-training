@@ -29,7 +29,7 @@ sed "s/TOBEREPLACED/${CLUSTER}/g" options-kubernetes-cluster.json.template > opt
 
 To deploy your kubernetes cluster:
 ```
-dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${CLUSTER}.json --package-version=2.2.2-1.13.5
+dcos kubernetes cluster create --yes --options=options-kubernetes-cluster${CLUSTER}.json --package-version=2.4.4-1.15.4
 ```
 
 To see the status of your Kubernetes cluster deployment run:
@@ -59,9 +59,9 @@ Output should look similar to below:
 ```
 $ kubectl get nodes
 NAME                                                           STATUS   ROLES    AGE   VERSION
-kube-control-plane-0-instance.trainingprodk8scluster01.mesos   Ready    master   17m   v1.13.5
-kube-node-0-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.13.5
-kube-node-1-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.13.5
+kube-control-plane-0-instance.trainingprodk8scluster01.mesos   Ready    master   17m   v1.15.4
+kube-node-0-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.15.4
+kube-node-1-kubelet.trainingprodk8scluster01.mesos             Ready    <none>   16m   v1.15.4
 ```
 
 ## Connect to the Kubernetes dashboard

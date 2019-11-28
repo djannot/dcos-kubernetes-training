@@ -6,7 +6,6 @@
   },
   "kubernetes": {
     "authorization_mode": "RBAC",
-    "dcos_token_authentication": false,
     "high_availability": false,
     "private_node_count": 2,
     "private_reserved_resources": {

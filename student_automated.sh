@@ -1,9 +1,11 @@
 ## CHANGE THIS EVERY TIME!!!
 export APPNAME=training
-export PUBLICIP=54.224.9.22
+export PUBLICIP=$(dcos node --json | jq --raw-output ".[] | select((.type | test(\"agent\")) and (.attributes.public_ip != null)) | .public_ips[0]" | head -1)
 export CLUSTER=djannot
 export REGION=us-east-1
-export clusters=20
+export clusters=40
+
+
 
 # 1. Deploy a Kubernetes cluster
 
@@ -43,7 +45,7 @@ done
 # 3. Upgrade your Kubernetes cluster
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do
-  dcos kubernetes cluster update --timeout=1s --cluster-name=training/prod/k8s/cluster${i} --package-version=2.3.3-1.14.3 --yes
+  dcos kubernetes cluster update --timeout=1s --cluster-name=training/prod/k8s/cluster${i} --package-version=2.4.0-1.15.1 --yes
 done
 
 awk -v clusters=${clusters} 'BEGIN { for (i=1; i<=clusters; i++) printf("%02d\n", i) }' | while read i; do

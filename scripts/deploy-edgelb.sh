@@ -1,5 +1,7 @@
-path=infra/network/dcos-edgelb
-serviceaccount=infra-network-dcos-edgelb
+#path=infra/network/dcos-edgelb
+#serviceaccount=infra-network-dcos-edgelb
+path=dcos-edgelb
+serviceaccount=dcos-edgelb
 
 dcos security org service-accounts keypair private-${serviceaccount}.pem public-${serviceaccount}.pem
 dcos security org service-accounts delete ${serviceaccount}
@@ -7,8 +9,10 @@ dcos security org service-accounts create -p public-${serviceaccount}.pem -d /${
 dcos security secrets delete /${path}/private-${serviceaccount}
 dcos security secrets create-sa-secret --strict private-${serviceaccount}.pem ${serviceaccount} /${path}/private-${serviceaccount}
 
-dcos security org users grant ${serviceaccount} dcos:secrets:default:/${path}/* full
-dcos security org users grant ${serviceaccount} dcos:secrets:list:default:/${path} full
+dcos security org users grant ${serviceaccount} dcos:adminrouter:ops:ca:ro full
+dcos security org users grant ${serviceaccount} dcos:adminrouter:ops:ca:rw full
+dcos security org users grant ${serviceaccount} dcos:secrets:default:/${path}/pools/* full
+dcos security org users grant ${serviceaccount} dcos:secrets:list:default:/${path}/pools/* full
 dcos security org users grant ${serviceaccount} dcos:adminrouter:service:marathon full
 dcos security org users grant ${serviceaccount} dcos:adminrouter:package full
 dcos security org users grant ${serviceaccount} dcos:adminrouter:service:edgelb full
@@ -26,10 +30,10 @@ dcos security org users grant ${serviceaccount} dcos:mesos:master:task:app_id fu
 dcos security org users grant ${serviceaccount} dcos:adminrouter:service:${path}/pools/all full
 dcos security org users grant ${serviceaccount} dcos:adminrouter:service:${path}/pools/dklb full
 
-dcos package repo add --index=0 edgelb-aws https://downloads.mesosphere.com/edgelb/v1.3.1/assets/stub-universe-edgelb.json
-dcos package repo add --index=0 edgelb-pool-aws https://downloads.mesosphere.com/edgelb-pool/v1.3.1/assets/stub-universe-edgelb-pool.json
+dcos package repo add --index=0 edgelb-aws https://downloads.mesosphere.com/edgelb/v1.4.0/assets/stub-universe-edgelb.json
+dcos package repo add --index=0 edgelb-pool-aws https://downloads.mesosphere.com/edgelb-pool/v1.4.0/assets/stub-universe-edgelb-pool.json
 
-dcos package install --yes edgelb --options=scripts/options-edgelb.json --package-version=v1.3.1
+dcos package install --yes edgelb --options=scripts/options-edgelb.json --package-version=v1.4.0
 
 sleep 10
 until dcos edgelb ping; do sleep 1; done

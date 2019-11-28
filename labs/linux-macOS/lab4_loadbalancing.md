@@ -16,7 +16,7 @@ dcos package install edgelb --cli --yes
 
 ## Create a secret for the DC/OS Service account
 ```
-SERVICE_ACCOUNT_SECRET=$(dcos security secrets get /dklb | awk '{ print $2 }')
+SERVICE_ACCOUNT_SECRET=$(dcos security secrets get /dklb-principal/sa --json | jq -r .value | base64 ${BASE64_ARGS} -)
 
 cat <<EOF | kubectl --kubeconfig=./config.cluster${CLUSTER} create -f -
 apiVersion: v1
@@ -106,7 +106,7 @@ kubectl --kubeconfig=./config.cluster${CLUSTER} get services
 
 A dklb EdgeLB pool is automatically created on DC/OS:
 ```
-dcos edgelb show dklb${CLUSTER}
+dcos edgelb --name=/edgelb show dklb${CLUSTER}
 ```
 
 Output should look similar to below:
@@ -209,7 +209,7 @@ EOF
 
 The dklb EdgeLB pool is automatically updated on DC/OS:
 ```
-dcos edgelb show dklb${CLUSTER}
+dcos edgelb --name=/edgelb show dklb${CLUSTER}
 ```
 
 Output should look like below:
@@ -318,7 +318,7 @@ EOF
 
 The dklb EdgeLB pool is automatically updated on DC/OS:
 ```
-dcos edgelb show dklb${CLUSTER}
+dcos edgelb --name=/edgelb show dklb${CLUSTER}
 ```
 
 Output should look like below:

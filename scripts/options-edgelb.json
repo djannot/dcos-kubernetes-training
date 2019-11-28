@@ -1,6 +1,6 @@
 {
   "service": {
-    "name": "/infra/network/dcos-edgelb/api",
+    "name": "infra/network/dcos-edgelb/api",
     "secretName": "infra/network/dcos-edgelb/private-infra-network-dcos-edgelb",
     "principal": "infra-network-dcos-edgelb",
     "mesosProtocol": "https"

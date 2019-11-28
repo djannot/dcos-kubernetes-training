@@ -17,7 +17,7 @@ Mesosphere provides multiple ways to achieving persistent storage for containeri
 
 To be able to use Portworx persistent storage on your Kubernetes cluster, you need to deploy it in your Kubernetes cluster using the following command:
 ```
-kubectl --kubeconfig=./config.cluster${CLUSTER} apply -f "https://install.portworx.com/2.0?kbver=1.14.3&b=true&dcos=true&stork=true"
+kubectl --kubeconfig=./config.cluster${CLUSTER} apply -f "https://install.portworx.com/2.0?kbver=1.15.5&b=true&dcos=true&stork=true"
 ```
 
 ## Create Kubernetes StorageClass
