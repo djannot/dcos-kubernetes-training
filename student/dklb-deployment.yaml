@@ -60,7 +60,7 @@ spec:
         - debug
         # NOTE: Must be changed whenever EdgeLB is installed under a DC/OS service group other than "dcos-edgelb".
         - --edgelb-pool-group
-        - edgelb/pools
+        - dcos-edgelb/pools
         - --edgelb-default-pool-size
         - "2"
         ports:

@@ -106,7 +106,7 @@ kubectl --kubeconfig=./config.cluster${CLUSTER} get services
 
 A dklb EdgeLB pool is automatically created on DC/OS:
 ```
-dcos edgelb --name=/edgelb show dklb${CLUSTER}
+dcos edgelb show dklb${CLUSTER}
 ```
 
 Output should look similar to below:
@@ -209,7 +209,7 @@ EOF
 
 The dklb EdgeLB pool is automatically updated on DC/OS:
 ```
-dcos edgelb --name=/edgelb show dklb${CLUSTER}
+dcos edgelb show dklb${CLUSTER}
 ```
 
 Output should look like below:
@@ -318,7 +318,7 @@ EOF
 
 The dklb EdgeLB pool is automatically updated on DC/OS:
 ```
-dcos edgelb --name=/edgelb show dklb${CLUSTER}
+dcos edgelb show dklb${CLUSTER}
 ```
 
 Output should look like below:
